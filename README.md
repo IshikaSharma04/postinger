@@ -1,8 +1,8 @@
-# Postly — Production Social Media Scheduling & Publishing Platform
+# Postinger — Production Social Media Scheduling & Publishing Platform
 
 > An enterprise-grade, multi-tenant social media management suite built with Next.js 15 (App Router), TypeScript, Three.js 3D telemetry, BullMQ distributed background queues, PostgreSQL (Prisma ORM), and Redis.
 
-[![Postly CI](https://github.com/ishikasharma/postly/actions/workflows/ci.yml/badge.svg)](https://github.com/ishikasharma/postly/actions/workflows/ci.yml)
+[![Postinger CI](https://github.com/ishikasharma/postinger/actions/workflows/ci.yml/badge.svg)](https://github.com/ishikasharma/postinger/actions/workflows/ci.yml)
 [![Node](https://img.shields.io/badge/Node.js-20.x-green.svg)](https://nodejs.org)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black.svg)](https://nextjs.org)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg)](https://www.typescriptlang.org)
@@ -104,8 +104,8 @@ graph TD
 
 ### 2. Clone & Install
 ```bash
-git clone https://github.com/ishikasharma/postly.git
-cd postly
+git clone https://github.com/ishikasharma/postinger.git
+cd postinger
 npm install
 ```
 
@@ -122,10 +122,10 @@ cp .env.example .env
 ```
 Ensure the connection strings point to your local containers:
 ```env
-DATABASE_URL="postgresql://postgres:postgrespassword@localhost:5432/postly?schema=public"
+DATABASE_URL="postgresql://postinger:postinger_dev_password@localhost:5432/postinger_db?schema=public"
 REDIS_URL="redis://localhost:6379"
-NEXTAUTH_SECRET="your-32-character-secret-key-goes-here"
-NEXTAUTH_URL="http://localhost:3000"
+AUTH_SECRET="your-32-character-secret-key-goes-here"
+AUTH_URL="http://localhost:3000"
 ```
 
 ### 5. Run Database Migrations & Seed
@@ -133,7 +133,7 @@ NEXTAUTH_URL="http://localhost:3000"
 npx prisma db push
 npm run db:seed
 ```
-*Creates the database schema and seeds a demo user (`demo@postly.app` / `Password123!`) with sample social accounts, draft posts, and workspace members.*
+*Creates the database schema and seeds a demo user (`demo@postinger.app` / `Password123!`) with sample social accounts, draft posts, and workspace members.*
 
 ### 6. Start the Development Server
 ```bash
@@ -197,4 +197,4 @@ Expected output:
 ---
 
 ## 📄 License
-MIT © [Postly](https://github.com/ishikasharma/postly)
+MIT © [Postinger](https://github.com/ishikasharma/postinger)

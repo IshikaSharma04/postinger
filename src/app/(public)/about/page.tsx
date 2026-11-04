@@ -113,7 +113,7 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold text-white mb-4">Start managing your social presence today</h2>
           <p className="text-slate-400 mb-8">Join thousands of creators who save hours every week with Postinger.</p>
           <Link
-            href="/signup"
+            href="/register"
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold transition-all shadow-lg shadow-emerald-500/20"
           >
             Get started for free

@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, Calendar, Share2 } from "lucide-react";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 import { BLOG_POSTS } from "@/lib/blog/posts";
 
 export async function generateStaticParams() {
@@ -23,7 +23,7 @@ export default async function BlogPostDetailPage({
       {/* Header */}
       <header className="border-b border-zinc-100 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
         <Link href="/" className="hover:opacity-80 transition-opacity">
-          <PostlyLogo size="md" />
+          <PostingerLogo size="md" />
         </Link>
         <Link
           href="/blog"
@@ -79,7 +79,7 @@ export default async function BlogPostDetailPage({
           </p>
           <div className="pt-2">
             <Link
-              href="/signup"
+              href="/register"
               className="inline-flex items-center gap-1.5 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition-colors"
             >
               Get Started Free →

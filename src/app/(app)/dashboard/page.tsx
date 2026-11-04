@@ -3,7 +3,6 @@ import { prisma } from "@/lib/db/client";
 import { redirect } from "next/navigation";
 import { DashboardClient } from "@/components/dashboard/DashboardClient";
 import { POST_TEMPLATES } from "@/lib/templates/post-templates";
-import { seedWorkspaceWithRichDemoData } from "@/lib/db/seed-workspace";
 
 export const metadata = {
   title: "Home | Postinger",
@@ -26,13 +25,6 @@ export default async function DashboardPage() {
   }
 
   const workspaceId = membership.workspace.id;
-
-  // Auto-seed if workspace is fresh so the user has immediate data to explore
-  const initialPostCount = await prisma.post.count({ where: { workspaceId } });
-  const initialAccountCount = await prisma.socialAccount.count({ where: { workspaceId } });
-  if (initialPostCount === 0 && initialAccountCount === 0) {
-    await seedWorkspaceWithRichDemoData(workspaceId, session.user.id);
-  }
 
   const [
     workspace,

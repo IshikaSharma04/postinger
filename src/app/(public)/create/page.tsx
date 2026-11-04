@@ -16,8 +16,8 @@ import {
   Compass,
   Zap,
 } from "lucide-react";
-import { PostlyNavbar } from "@/components/layout/PostlyNavbar";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerPublicNavbar } from "@/components/layout/PostingerPublicNavbar";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 import {
   TwitterXIcon,
   LinkedInIcon,
@@ -44,15 +44,15 @@ const FAQS = [
   },
 ];
 
-export default function PostlyCreatePage() {
+export default function PostingerCreatePage() {
   const [activeFaq, setActiveFaq] = useState<number | null>(0);
   const [boardView, setBoardView] = useState<"BOARD" | "GALLERY">("BOARD");
   const [activeTab, setActiveTab] = useState<"IDEAS" | "TEMPLATES" | "FEEDS">("IDEAS");
 
   return (
     <div className="min-h-screen bg-[#F4F0EB] text-[#121212] font-sans antialiased selection:bg-[#C4F279] selection:text-black">
-      {/* ── Postly Sticky Navigation ── */}
-      <PostlyNavbar />
+      {/* ── Postinger Sticky Navigation ── */}
+      <PostingerPublicNavbar />
 
       {/* ── Hero Section (Scratchpad Experience) ── */}
       <section className="pt-12 sm:pt-20 pb-16 sm:pb-24 overflow-hidden">

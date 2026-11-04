@@ -67,15 +67,13 @@ export async function POST(req: NextRequest) {
     return apiForbidden("Only owners and admins can invite team members");
   }
 
-  // Enforce team member plan limits (exempt in test)
-  if (process.env.NODE_ENV !== "test") {
-    const limits = getPlanLimits(caller.workspace.plan);
-    const currentMemberCount = await prisma.workspaceMember.count({ where: { workspaceId } });
-    if (currentMemberCount >= limits.teamMembers) {
-      return apiError(
-        `Plan limit reached: You can have up to ${limits.teamMembers} team members on the ${limits.name} plan. Upgrade to invite more collaborators.`
-      );
-    }
+  // Enforce team member plan limits
+  const limits = getPlanLimits(caller.workspace.plan);
+  const currentMemberCount = await prisma.workspaceMember.count({ where: { workspaceId } });
+  if (currentMemberCount >= limits.teamMembers) {
+    return apiError(
+      `Plan limit reached: You can have up to ${limits.teamMembers} team members on the ${limits.name} plan. Upgrade to invite more collaborators.`
+    );
   }
 
   // Find or create invited user

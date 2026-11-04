@@ -15,13 +15,13 @@ import {
   ChevronRight,
   Zap,
 } from "lucide-react";
-import { PostlyNavbar } from "@/components/layout/PostlyNavbar";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
-import { BufferSocialMarquee } from "@/components/home/BufferSocialMarquee";
-import { BufferHeroMockup } from "@/components/home/BufferHeroMockup";
-import { BufferInteractivePostStudio } from "@/components/home/BufferInteractivePostStudio";
-import { BufferBestTimeHeatmap } from "@/components/home/BufferBestTimeHeatmap";
-import { BufferPricingCalculator } from "@/components/home/BufferPricingCalculator";
+import { PostingerPublicNavbar } from "@/components/layout/PostingerPublicNavbar";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
+import { PostingerSocialMarquee } from "@/components/home/PostingerSocialMarquee";
+import { PostingerHeroMockup } from "@/components/home/PostingerHeroMockup";
+import { PostingerInteractivePostStudio } from "@/components/home/PostingerInteractivePostStudio";
+import { PostingerBestTimeHeatmap } from "@/components/home/PostingerBestTimeHeatmap";
+import { PostingerPricingCalculator } from "@/components/home/PostingerPricingCalculator";
 import {
   TwitterXIcon,
   LinkedInIcon,
@@ -31,8 +31,8 @@ import {
   PinterestIcon,
 } from "@/components/icons/SocialBrandIcons";
 
-import { BufferHeroWorkspace } from "@/components/home/BufferHeroWorkspace";
-import { BufferShowcaseCards } from "@/components/home/BufferShowcaseCards";
+import { PostingerHeroWorkspace } from "@/components/home/PostingerHeroWorkspace";
+import { PostingerShowcaseCards } from "@/components/home/PostingerShowcaseCards";
 
 export default function HomePage() {
   return (
@@ -56,11 +56,11 @@ export default function HomePage() {
         <span className="hidden sm:inline-block w-8 h-[1px] bg-zinc-800" />
       </div>
 
-      {/* ── Official Postly Navigation ─────────────────────────────────── */}
-      <PostlyNavbar />
+      {/* ── Official Postinger Navigation ─────────────────────────────────── */}
+      <PostingerPublicNavbar />
 
       {/* ── Buffer Hero Workspace (matching Screenshot 1) ─────────────── */}
-      <BufferHeroWorkspace />
+      <PostingerHeroWorkspace />
 
       {/* ── Social Proof Marquee (matching Screenshot 2) ──────────────── */}
       <section className="py-12 border-b border-[#E8E6DF] bg-[#FAFAF8]">
@@ -69,13 +69,13 @@ export default function HomePage() {
             313,986 creators, brands, and agencies using Postinger
           </p>
         </div>
-        <BufferSocialMarquee />
+        <PostingerSocialMarquee />
       </section>
 
       {/* ── Side-by-Side Product Showcase (matching Screenshot 2) ─────── */}
-      <BufferShowcaseCards />
+      <PostingerShowcaseCards />
 
-      {/* ── Postly 4 Core Workflows (2x2 Grid) ────────────────────────── */}
+      {/* ── Postinger 4 Core Workflows (2x2 Grid) ────────────────────────── */}
       <section className="py-24 max-w-7xl mx-auto px-6">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-xs font-extrabold uppercase tracking-widest text-[#25523B] bg-[#C4F279]/60 px-3 py-1 rounded-full">
@@ -291,7 +291,7 @@ export default function HomePage() {
               Switch networks to preview how Postinger automatically customizes character limits, formatting, and media aspect ratios.
             </p>
           </div>
-          <BufferInteractivePostStudio />
+          <PostingerInteractivePostStudio />
         </div>
       </section>
 
@@ -308,7 +308,7 @@ export default function HomePage() {
             No more guessing games. Our heatmap reveals follower activity 24 hours a day, 7 days a week.
           </p>
         </div>
-        <BufferBestTimeHeatmap />
+        <PostingerBestTimeHeatmap />
       </section>
 
       {/* ── Customer Quotes ───────────────────────────────────────────── */}
@@ -401,7 +401,7 @@ export default function HomePage() {
 
       {/* ── Interactive Pricing Calculator ────────────────────────────── */}
       <section id="pricing" className="py-24 max-w-6xl mx-auto px-6">
-        <BufferPricingCalculator />
+        <PostingerPricingCalculator />
       </section>
 
       {/* ── Mint Bottom Banner ────────────────────────────────────────── */}
@@ -430,12 +430,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── Postly Footer ─────────────────────────────────────────────── */}
+      {/* ── Postinger Footer ─────────────────────────────────────────────── */}
       <footer className="border-t border-[#E6E1D8] bg-[#F4F0EB] py-16 text-xs text-zinc-600">
         <div className="max-w-7xl mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
             <div className="col-span-2 space-y-3">
-              <PostlyLogo size="md" />
+              <PostingerLogo size="md" />
               <p className="text-zinc-500 max-w-sm mb-4 leading-relaxed">
                 Postinger is a social media workspace that helps individuals, creators, and teams brainstorm, publish, analyze, and engage across social networks.
               </p>

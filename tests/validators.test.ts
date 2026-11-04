@@ -53,13 +53,13 @@ describe("Validation Schemas", () => {
 
   describe("loginSchema", () => {
     it("validates correct login credentials format", () => {
-      const valid = { email: "user@postly.app", password: "Password123!" };
+      const valid = { email: "user@postinger.app", password: "Password123!" };
       const res = loginSchema.safeParse(valid);
       assert.equal(res.success, true);
     });
 
     it("rejects empty password", () => {
-      const invalid = { email: "user@postly.app", password: "" };
+      const invalid = { email: "user@postinger.app", password: "" };
       const res = loginSchema.safeParse(invalid);
       assert.equal(res.success, false);
     });
@@ -119,8 +119,8 @@ describe("Validation Schemas", () => {
       const valid = {
         workspaceId: "ws-123",
         platform: "TWITTER",
-        handle: "postlyapp",
-        displayName: "Postly App",
+        handle: "postingerapp",
+        displayName: "Postinger App",
       };
       const res = connectAccountSchema.safeParse(valid);
       assert.equal(res.success, true);

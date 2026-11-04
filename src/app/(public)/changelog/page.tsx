@@ -174,7 +174,7 @@ export default function ChangelogPage() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link
-              href="/signup"
+              href="/register"
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-semibold shadow-lg shadow-emerald-500/20 transition-all"
             >
               Get started for free

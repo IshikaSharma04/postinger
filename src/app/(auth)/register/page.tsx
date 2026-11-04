@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, CheckCircle2, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 import { registerSchema, type RegisterInput } from "@/lib/validators/schemas";
 
 function RegisterForm() {
@@ -80,7 +80,7 @@ function RegisterForm() {
         <div>
           {/* Logo */}
           <Link href="/" className="inline-block mb-12">
-            <PostlyLogo size="md" light />
+            <PostingerLogo size="md" light />
           </Link>
 
           {/* Heading */}

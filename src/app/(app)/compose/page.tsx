@@ -113,10 +113,10 @@ function ComposeContent() {
 
         // Restore from localStorage prefill
         if (!prefill && !editId) {
-          const cached = localStorage.getItem("postly_compose_prefill");
+          const cached = localStorage.getItem("postinger_compose_prefill");
           if (cached) {
             setBody(cached);
-            localStorage.removeItem("postly_compose_prefill");
+            localStorage.removeItem("postinger_compose_prefill");
           }
         }
       } catch (err) {

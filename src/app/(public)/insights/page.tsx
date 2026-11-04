@@ -9,13 +9,13 @@ import {
   TrendingUp,
   Users,
 } from "lucide-react";
-import { PostlyNavbar } from "@/components/layout/PostlyNavbar";
-import { BufferBestTimeHeatmap } from "@/components/home/BufferBestTimeHeatmap";
+import { PostingerPublicNavbar } from "@/components/layout/PostingerPublicNavbar";
+import { PostingerBestTimeHeatmap } from "@/components/home/PostingerBestTimeHeatmap";
 
-export default function PostlyInsightsPage() {
+export default function PostingerInsightsPage() {
   return (
     <div className="min-h-screen bg-[#F4F0EB] text-[#121212] font-sans antialiased selection:bg-[#C4F279] selection:text-black">
-      <PostlyNavbar />
+      <PostingerPublicNavbar />
 
       <section className="pt-12 sm:pt-20 pb-16 sm:pb-24">
         <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
@@ -53,7 +53,7 @@ export default function PostlyInsightsPage() {
                     +42.8% Growth
                   </span>
                 </div>
-                <BufferBestTimeHeatmap />
+                <PostingerBestTimeHeatmap />
               </div>
             </div>
           </div>

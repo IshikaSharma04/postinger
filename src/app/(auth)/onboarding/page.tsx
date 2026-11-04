@@ -18,7 +18,7 @@ import {
   Building,
   CheckCircle2,
 } from "lucide-react";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 
 interface OnboardingAnswers {
   currentStep: number;
@@ -135,7 +135,7 @@ export default function OnboardingPage() {
       {/* Top Bar with Progress */}
       <header className="bg-white border-b border-zinc-200 px-6 py-4">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
-          <PostlyLogo size="sm" />
+          <PostingerLogo size="sm" />
           <div className="flex items-center gap-3">
             <span className="text-xs font-bold text-zinc-500">
               Step {step} of {totalSteps}

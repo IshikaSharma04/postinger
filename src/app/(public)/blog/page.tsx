@@ -1,7 +1,7 @@
 import React from "react";
 import Link from "next/link";
 import { ArrowRight, BookOpen, Clock } from "lucide-react";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 import { BLOG_POSTS } from "@/lib/blog/posts";
 
 export default function BlogIndexPage() {
@@ -10,14 +10,14 @@ export default function BlogIndexPage() {
       {/* Header */}
       <header className="border-b border-zinc-100 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
         <Link href="/" className="hover:opacity-80 transition-opacity">
-          <PostlyLogo size="md" />
+          <PostingerLogo size="md" />
         </Link>
         <div className="flex items-center gap-3">
           <Link href="/login" className="text-xs font-bold text-zinc-700 hover:text-zinc-900 px-3 py-2">
             Log in
           </Link>
           <Link
-            href="/signup"
+            href="/register"
             className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-xs"
           >
             Get Started Free

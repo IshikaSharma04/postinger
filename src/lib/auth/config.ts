@@ -4,6 +4,8 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "@/lib/db/client";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { checkRateLimitAsync } from "@/lib/utils/rate-limit";
+import { logger } from "@/lib/utils/logger";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -12,7 +14,7 @@ const loginSchema = z.object({
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
-  trustHost: true,
+  trustHost: process.env.AUTH_TRUST_HOST === "true",
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
@@ -51,9 +53,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!parsed.success) return null;
 
         const { email, password } = parsed.data;
+        const normalizedEmail = email.toLowerCase().trim();
+
+        const authMax = parseInt(process.env.AUTH_RATE_LIMIT_MAX || "10", 10);
+        const rl = await checkRateLimitAsync({
+          identifier: `login:${normalizedEmail}`,
+          max: authMax,
+          windowMs: 15 * 60 * 1000,
+        });
+        if (!rl.allowed) {
+          throw new Error("Too many login attempts. Please try again later.");
+        }
 
         const user = await prisma.user.findUnique({
-          where: { email: email.toLowerCase().trim() },
+          where: { email: normalizedEmail },
         });
 
         if (!user || !user.passwordHash) return null;
@@ -71,8 +84,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   events: {
     async signIn({ user }) {
-      // Safe audit log — no passwords or tokens
-      console.log(`[AUTH] User signed in: ${user.id}`);
+      logger.info(`User signed in: ${user.id}`);
     },
   },
 });

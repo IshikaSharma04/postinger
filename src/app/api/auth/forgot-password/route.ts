@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/db/client";
 import { apiSuccess, apiError } from "@/lib/utils/api";
-import { checkRateLimit } from "@/lib/utils/rate-limit";
+import { checkRateLimitAsync, getClientIp } from "@/lib/utils/rate-limit";
 import crypto from "crypto";
 import { z } from "zod";
 
@@ -10,15 +10,7 @@ const forgotSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0] ?? "unknown";
-  const rl = checkRateLimit({
-    identifier: `forgot-pw:${ip}`,
-    windowMs: 15 * 60 * 1000,
-    max: 5,
-  });
-  if (!rl.allowed) {
-    return apiError("Too many password reset requests. Please try again later.", 429, "RATE_LIMITED");
-  }
+  const ip = getClientIp(req);
 
   let body: unknown;
   try {
@@ -33,6 +25,15 @@ export async function POST(req: NextRequest) {
   }
 
   const email = parsed.data.email.toLowerCase().trim();
+
+  const rl = await checkRateLimitAsync({
+    identifier: `forgot-pw:${ip}:${email}`,
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+  });
+  if (!rl.allowed) {
+    return apiError("Too many password reset requests. Please try again later.", 429, "RATE_LIMITED");
+  }
   const user = await prisma.user.findUnique({ where: { email } });
 
   if (user) {
@@ -57,25 +58,17 @@ export async function POST(req: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
     const resetUrl = `${appUrl}/reset-password?token=${token}`;
 
-    const { sendOrCaptureEmail } = await import("@/lib/email/mailbox");
-    await sendOrCaptureEmail({
+    const { sendEmail } = await import("@/lib/email/send");
+    const { passwordResetEmailTemplate } = await import("@/lib/email/templates");
+    const template = passwordResetEmailTemplate({ resetUrl });
+
+    await sendEmail({
       to: email,
-      subject: "Reset your Postinger password",
+      subject: template.subject,
       type: "PASSWORD_RESET",
       actionUrl: resetUrl,
-      text: `Click here to reset your Postinger password: ${resetUrl}. This link expires in 1 hour.`,
-      html: `
-        <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; padding: 24px;">
-          <h2 style="color: #111;">Password Reset Request</h2>
-          <p>We received a request to reset your password for your Postinger account.</p>
-          <div style="margin: 32px 0;">
-            <a href="${resetUrl}" style="background-color: #2563eb; color: #fff; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-block;">
-              Reset Password →
-            </a>
-          </div>
-          <p style="color: #666; font-size: 13px;">This link will expire in 60 minutes. If you did not make this request, you can safely ignore this email.</p>
-        </div>
-      `,
+      text: template.text,
+      html: template.html,
     });
   }
 

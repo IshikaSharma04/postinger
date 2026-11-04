@@ -12,9 +12,9 @@ export function getUtcForZonedTime(
   minute: number,
   timezone: string
 ): Date {
-  // Approximate as UTC first
-  const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}T${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}:00Z`;
-  const initialUtc = new Date(dateStr);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const iso = `${year}-${pad(month)}-${pad(day)}T${pad(hour)}:${pad(minute)}:00`;
+  const utcGuess = new Date(`${iso}Z`);
 
   try {
     const formatter = new Intl.DateTimeFormat("en-US", {
@@ -28,20 +28,28 @@ export function getUtcForZonedTime(
       hour12: false,
     });
 
-    const parts = formatter.formatToParts(initialUtc);
-    const getVal = (type: string) => {
-      const part = parts.find((p) => p.type === type);
-      return part ? parseInt(part.value, 10) : 0;
-    };
+    const parts = formatter.formatToParts(utcGuess);
+    const p: Record<string, string> = {};
+    for (const part of parts) {
+      p[part.type] = part.value;
+    }
 
-    const targetHour = getVal("hour") === 24 ? 0 : getVal("hour");
-    const targetMinute = getVal("minute");
-    const diffMinutes = (targetHour - hour) * 60 + (targetMinute - minute);
+    const rawHour = parseInt(p.hour || "0", 10);
+    const targetInTz = new Date(
+      Date.UTC(
+        parseInt(p.year || "0", 10),
+        parseInt(p.month || "1", 10) - 1,
+        parseInt(p.day || "1", 10),
+        rawHour === 24 ? 0 : rawHour,
+        parseInt(p.minute || "0", 10),
+        parseInt(p.second || "0", 10)
+      )
+    );
 
-    // Adjust UTC by the difference to land on the exact local wall-clock time
-    return new Date(initialUtc.getTime() - diffMinutes * 60 * 1000);
+    const offsetMs = targetInTz.getTime() - utcGuess.getTime();
+    return new Date(utcGuess.getTime() - offsetMs);
   } catch {
-    return initialUtc;
+    return utcGuess;
   }
 }
 

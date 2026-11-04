@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     where: { workspaceId: data.workspaceId },
   });
 
-  if (process.env.NODE_ENV !== "test" && currentCount >= limits.maxChannels) {
+  if (currentCount >= limits.maxChannels) {
     return apiError(
       `Plan limit reached: You can connect up to ${limits.maxChannels} channels on the ${limits.name} plan. Upgrade to connect more.`
     );

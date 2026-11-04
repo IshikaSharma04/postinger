@@ -28,7 +28,7 @@ import {
   Flame,
 } from "lucide-react";
 import { cn } from "@/lib/utils/helpers";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 import { ConnectChannelModal } from "@/components/channels/ConnectChannelModal";
 import { WhatsNewDrawer } from "@/components/layout/WhatsNewDrawer";
 import { CommandPalette } from "@/components/layout/CommandPalette";
@@ -140,7 +140,7 @@ export function Sidebar() {
           {!isCollapsed ? (
             <>
               <Link href="/dashboard" className="flex items-center gap-2">
-                <PostlyLogo size="sm" light />
+                <PostingerLogo size="sm" light />
               </Link>
               <button
                 onClick={() => setShowWhatsNew(true)}
@@ -153,7 +153,7 @@ export function Sidebar() {
           ) : (
             <div className="w-full flex justify-center">
               <Link href="/dashboard">
-                <PostlyLogo size="sm" light showWordmark={false} />
+                <PostingerLogo size="sm" light showWordmark={false} />
               </Link>
             </div>
           )}

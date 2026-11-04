@@ -34,7 +34,7 @@ const PRESETS = [
 
 type PlatformKey = "TWITTER" | "LINKEDIN" | "INSTAGRAM";
 
-export function BufferInteractivePostStudio() {
+export function PostingerInteractivePostStudio() {
   const [selectedPlatform, setSelectedPlatform] = useState<PlatformKey>("TWITTER");
   const [content, setContent] = useState(PRESETS[0].text);
   const [tags, setTags] = useState(PRESETS[0].tags);

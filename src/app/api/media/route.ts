@@ -7,7 +7,6 @@ import { auth } from "@/lib/auth/config";
 import { apiSuccess, apiError, apiUnauthorized, apiForbidden } from "@/lib/utils/api";
 import { ALLOWED_MIME_TYPES, MAX_FILE_SIZE_BYTES } from "@/lib/validators/schemas";
 
-const UPLOAD_DIR = process.env.UPLOAD_DIR ?? "./public/uploads";
 
 export async function POST(req: NextRequest) {
   const session = await auth();

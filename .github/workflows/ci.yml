@@ -1,4 +1,4 @@
-name: Postly CI
+name: Postinger CI
 
 on:
   push:
@@ -17,7 +17,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgrespassword
-          POSTGRES_DB: postly_test
+          POSTGRES_DB: postinger_test
         ports:
           - 5432:5432
         options: >-
@@ -37,10 +37,10 @@ jobs:
           --health-retries 5
 
     env:
-      DATABASE_URL: "postgresql://postgres:postgrespassword@localhost:5432/postly_test?schema=public"
+      DATABASE_URL: "postgresql://postgres:postgrespassword@localhost:5432/postinger_test?schema=public"
       REDIS_URL: "redis://localhost:6379"
-      NEXTAUTH_SECRET: "ci-test-secret-must-be-at-least-32-characters-long"
-      NEXTAUTH_URL: "http://localhost:3000"
+      AUTH_SECRET: "ci-test-secret-must-be-at-least-32-characters-long"
+      AUTH_URL: "http://localhost:3000"
 
     steps:
       - name: Checkout code

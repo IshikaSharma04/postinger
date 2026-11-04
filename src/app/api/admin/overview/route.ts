@@ -4,7 +4,7 @@ import { apiForbidden, apiSuccess, apiUnauthorized } from "@/lib/utils/api";
 import { prisma } from "@/lib/db/client";
 
 // System admin emails allowed to access platform admin tools
-const SYSTEM_ADMIN_EMAILS = (process.env.SYSTEM_ADMIN_EMAILS ?? "admin@postinger.app,admin@postly.app")
+const SYSTEM_ADMIN_EMAILS = (process.env.SYSTEM_ADMIN_EMAILS ?? "admin@postinger.app")
   .split(",")
   .map((e) => e.trim().toLowerCase());
 

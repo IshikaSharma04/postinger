@@ -23,7 +23,7 @@ import {
   PinterestIcon,
 } from "@/components/icons/SocialBrandIcons";
 
-export function BufferLogoIcon({ className = "w-7 h-7" }: { className?: string }) {
+export function PostingerLogoIcon({ className = "w-7 h-7" }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" fill="currentColor" className={className}>
       <path d="M16 2.5L2 9.5l14 7 14-7L16 2.5z" />
@@ -33,7 +33,7 @@ export function BufferLogoIcon({ className = "w-7 h-7" }: { className?: string }
   );
 }
 
-export function BufferNavbar() {
+export function PostingerNavbar() {
   const [featuresOpen, setFeaturesOpen] = useState(false);
   const [integrationsOpen, setIntegrationsOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -44,8 +44,8 @@ export function BufferNavbar() {
         {/* Logo */}
         <div className="flex items-center gap-10">
           <Link href="/" className="flex items-center gap-2 text-zinc-900 group">
-            <BufferLogoIcon className="w-8 h-8 text-zinc-950 transition-transform group-hover:scale-105" />
-            <span className="font-extrabold text-2xl tracking-tight text-zinc-950">Buffer</span>
+            <PostingerLogoIcon className="w-8 h-8 text-zinc-950 transition-transform group-hover:scale-105" />
+            <span className="font-extrabold text-2xl tracking-tight text-zinc-950">Postinger</span>
           </Link>
 
           {/* Desktop Navigation Links */}

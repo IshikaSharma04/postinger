@@ -88,7 +88,7 @@ export default function LinkInBioTool() {
               </div>
 
               <Link
-                href={`/signup?claim=${encodeURIComponent(handle)}`}
+                href={`/register?claim=${encodeURIComponent(handle)}`}
                 className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition-all"
               >
                 <span>Claim This Free Start Page</span>

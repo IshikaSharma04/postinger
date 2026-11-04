@@ -8,7 +8,7 @@ describe("Post Validation Schemas", () => {
       const payload = {
         workspaceId: "ws_clx001",
         title: "Product Launch Announcement",
-        body: "Excited to introduce Postly — an enterprise-grade social planning suite.",
+        body: "Excited to introduce Postinger — an enterprise-grade social planning suite.",
         hashtags: ["buildinpublic", "nextjs", "tech"],
         socialAccountIds: ["acc_tw_123", "acc_li_456"],
         status: "SCHEDULED" as const,

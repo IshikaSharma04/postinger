@@ -15,7 +15,7 @@ const BRAND_LOGOS = [
   { name: "ElevenLabs", style: "font-sans font-bold tracking-tight" },
 ];
 
-export function BufferSocialMarquee() {
+export function PostingerSocialMarquee() {
   return (
     <div className="w-full overflow-hidden py-4 relative">
       {/* Edge gradient masks */}

@@ -8,7 +8,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 import { loginSchema, type LoginInput } from "@/lib/validators/schemas";
 
 function LoginForm() {
@@ -26,8 +26,8 @@ function LoginForm() {
   } = useForm<LoginInput>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "demo@postly.app",
-      password: "Demo1234!",
+      email: process.env.NODE_ENV !== "production" ? "demo@postinger.app" : "",
+      password: process.env.NODE_ENV !== "production" ? "Demo1234!" : "",
     },
   });
 
@@ -62,7 +62,7 @@ function LoginForm() {
         <div>
           {/* Logo */}
           <Link href="/" className="inline-block mb-12">
-            <PostlyLogo size="md" light />
+            <PostingerLogo size="md" light />
           </Link>
 
           {/* Heading */}
@@ -76,23 +76,25 @@ function LoginForm() {
             </Link>
           </p>
 
-          {/* Demo Credentials Pill */}
-          <div className="mb-6 p-3.5 rounded-2xl bg-zinc-900 border border-zinc-700/80 flex items-center justify-between">
-            <div>
-              <p className="text-[11px] font-bold text-[#98E376] uppercase tracking-wider">Demo Account</p>
-              <p style={{ color: "#e4e4e7" }} className="text-xs text-zinc-200 font-mono">demo@postly.app &bull; Demo1234!</p>
+          {/* Demo Credentials Pill (Development only) */}
+          {process.env.NODE_ENV !== "production" && (
+            <div className="mb-6 p-3.5 rounded-2xl bg-zinc-900 border border-zinc-700/80 flex items-center justify-between">
+              <div>
+                <p className="text-[11px] font-bold text-[#98E376] uppercase tracking-wider">Demo Account</p>
+                <p style={{ color: "#e4e4e7" }} className="text-xs text-zinc-200 font-mono">demo@postinger.app &bull; Demo1234!</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setValue("email", "demo@postinger.app");
+                  setValue("password", "Demo1234!");
+                }}
+                className="px-3 py-1.5 rounded-xl bg-[#98E376]/20 hover:bg-[#98E376]/30 text-[#98E376] text-xs font-bold transition-colors"
+              >
+                Fill Demo
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => {
-                setValue("email", "demo@postly.app");
-                setValue("password", "Demo1234!");
-              }}
-              className="px-3 py-1.5 rounded-xl bg-[#98E376]/20 hover:bg-[#98E376]/30 text-[#98E376] text-xs font-bold transition-colors"
-            >
-              Fill Demo
-            </button>
-          </div>
+          )}
 
           {/* Form */}
           <form

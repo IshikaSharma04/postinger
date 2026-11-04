@@ -6,7 +6,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../src/lib/db/client";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-const COOKIE_FILE_ATTACKER = "/tmp/postly_attacker_cookies.txt";
+const COOKIE_FILE_ATTACKER = "/tmp/postinger_attacker_cookies.txt";
 
 describe("Tenant Data Isolation & Security Access Control", async () => {
   let attackerCookieHeader = "";

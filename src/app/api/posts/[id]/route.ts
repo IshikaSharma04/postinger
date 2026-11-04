@@ -4,9 +4,8 @@ import { apiSuccess, apiError, apiUnauthorized, apiForbidden, apiNotFound } from
 import { auth } from "@/lib/auth/config";
 import { updatePostSchema } from "@/lib/validators/schemas";
 import { createAuditLog } from "@/lib/utils/audit";
-import { enqueuePublishJob, processPublishJob } from "@/lib/queue/worker";
+import { createJobsForPost, enqueueJobsAfterCommit, cancelJobsForPost } from "@/lib/posts/publishing";
 import { getNextQueueSlot } from "@/lib/utils/queue-slot";
-import { v4 as uuidv4 } from "uuid";
 
 type RouteParams = { params: Promise<{ id: string }> };
 
@@ -106,12 +105,42 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     targetScheduledAt = null;
   }
 
+  if (member.role === "VIEWER") {
+    return apiForbidden("Viewers have read-only access and cannot edit posts");
+  }
+
+  if (
+    member.role === "CONTRIBUTOR" &&
+    (isPublishNow || data.action === "SCHEDULE" || data.action === "QUEUE" || targetStatus === "SCHEDULED" || targetStatus === "PROCESSING")
+  ) {
+    return apiForbidden("Contributors cannot schedule or publish posts directly");
+  }
+
+  // Validate social accounts belong to workspace
+  if (data.socialAccountIds && data.socialAccountIds.length > 0) {
+    const accounts = await prisma.socialAccount.findMany({
+      where: { id: { in: data.socialAccountIds }, workspaceId: post.workspaceId },
+    });
+    if (accounts.length !== data.socialAccountIds.length) {
+      return apiError("One or more social accounts are invalid or belong to another workspace");
+    }
+  }
+
+  // Validate media assets belong to workspace
+  if (data.mediaAssetIds && data.mediaAssetIds.length > 0) {
+    const assets = await prisma.mediaAsset.findMany({
+      where: { id: { in: data.mediaAssetIds }, workspaceId: post.workspaceId },
+    });
+    if (assets.length !== data.mediaAssetIds.length) {
+      return apiError("One or more media assets are invalid or belong to another workspace");
+    }
+  }
+
+  let jobsToEnqueue: Awaited<ReturnType<typeof createJobsForPost>> = [];
+
   const updated = await prisma.$transaction(async (tx) => {
     // Cancel existing pending jobs if rescheduling or setting to draft
-    await tx.publishingJob.updateMany({
-      where: { postId: id, status: { in: ["PENDING", "RETRYING"] } },
-      data: { status: "CANCELLED" },
-    });
+    await cancelJobsForPost(tx, id);
 
     const updatedPost = await tx.post.update({
       where: { id },
@@ -155,47 +184,24 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
       },
     });
 
-    // Schedule or dispatch jobs if needed
+    // Schedule jobs inside transaction if needed
     if ((updatedPost.status === "SCHEDULED" || isPublishNow) && updatedPost.scheduledAt) {
-      for (const acc of updatedPost.postAccounts) {
-        const idempotencyKey = uuidv4();
-        const job = await tx.publishingJob.create({
-          data: {
-            postId: id,
-            socialAccountId: acc.socialAccountId,
-            scheduledAt: updatedPost.scheduledAt!,
-            idempotencyKey,
-            status: isPublishNow ? "RUNNING" : "PENDING",
-            startedAt: isPublishNow ? new Date() : null,
-          },
-        });
-
-        await enqueuePublishJob(
-          {
-            publishingJobId: job.id,
-            postId: id,
-            socialAccountId: acc.socialAccountId,
-            workspaceId: post.workspaceId,
-            idempotencyKey,
-          },
-          updatedPost.scheduledAt!
-        );
-
-        if (isPublishNow) {
-          processPublishJob({
-            publishingJobId: job.id,
-            postId: id,
-            socialAccountId: acc.socialAccountId,
-            workspaceId: post.workspaceId,
-            idempotencyKey,
-          }).catch((err) => console.error("[PublishNow] PATCH execution error:", err?.message));
-        }
-      }
+      jobsToEnqueue = await createJobsForPost(tx, {
+        postId: id,
+        workspaceId: post.workspaceId,
+        socialAccountIds: updatedPost.postAccounts.map((a) => a.socialAccountId),
+        scheduledAt: updatedPost.scheduledAt,
+        isPublishNow,
+      });
     }
 
     return updatedPost;
   });
 
+  // Enqueue jobs after transaction commits
+  if (jobsToEnqueue.length > 0) {
+    await enqueueJobsAfterCommit(jobsToEnqueue);
+  }
 
   await createAuditLog({
     workspaceId: post.workspaceId,
@@ -229,7 +235,10 @@ export async function DELETE(_req: NextRequest, { params }: RouteParams) {
     return apiError("Cannot delete a post that is currently being processed");
   }
 
-  await prisma.post.delete({ where: { id } });
+  await prisma.$transaction(async (tx) => {
+    await cancelJobsForPost(tx, id);
+    await tx.post.delete({ where: { id } });
+  });
 
   await createAuditLog({
     workspaceId: post.workspaceId,

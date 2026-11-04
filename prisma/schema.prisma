@@ -1,4 +1,4 @@
-// Postly — Production Prisma Schema
+// Postinger — Production Prisma Schema
 // Run: npx prisma db push
 
 generator client {
@@ -246,6 +246,7 @@ enum PostStatus {
   PUBLISHED
   FAILED
   CANCELLED
+  PARTIALLY_FAILED
 }
 
 model PostVariant {
@@ -519,6 +520,7 @@ model PublishingJob {
   status          JobStatus  @default(PENDING)
   scheduledAt     DateTime
   startedAt       DateTime?
+  lockedAt        DateTime?
   completedAt     DateTime?
   idempotencyKey  String     @unique
   attempts        Int        @default(0)

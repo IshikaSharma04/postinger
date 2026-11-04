@@ -3,17 +3,17 @@
 import React from "react";
 import Link from "next/link";
 import { Check, ArrowRight, Sparkles, HelpCircle } from "lucide-react";
-import { PostlyNavbar } from "@/components/layout/PostlyNavbar";
-import { BufferPricingCalculator } from "@/components/home/BufferPricingCalculator";
+import { PostingerPublicNavbar } from "@/components/layout/PostingerPublicNavbar";
+import { PostingerPricingCalculator } from "@/components/home/PostingerPricingCalculator";
 
-export default function PostlyPricingPage() {
+export default function PostingerPricingPage() {
   return (
     <div className="min-h-screen bg-[#F4F0EB] text-[#121212] font-sans antialiased selection:bg-[#C4F279] selection:text-black">
-      <PostlyNavbar />
+      <PostingerPublicNavbar />
 
       <section className="pt-16 pb-24">
         <div className="max-w-7xl mx-auto px-6">
-          <BufferPricingCalculator />
+          <PostingerPricingCalculator />
         </div>
       </section>
 

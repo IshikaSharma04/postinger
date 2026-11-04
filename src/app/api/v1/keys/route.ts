@@ -119,7 +119,14 @@ export async function DELETE(req: NextRequest) {
     return apiForbidden("Only owners and admins can revoke API keys");
   }
 
-  await prisma.apiKey.delete({ where: { id } });
+  const updated = await prisma.apiKey.updateMany({
+    where: { id, workspaceId, revokedAt: null },
+    data: { revokedAt: new Date() },
+  });
+
+  if (updated.count === 0) {
+    return apiError("API key not found", 404);
+  }
 
   await createAuditLog({
     workspaceId,

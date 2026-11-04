@@ -1,10 +1,12 @@
-import { Queue, Worker, Job } from "bullmq";
+import { Queue, Worker, type Job } from "bullmq";
 import IORedis from "ioredis";
 import { prisma } from "@/lib/db/client";
 import { getProvider } from "@/lib/providers/adapters";
-import { Platform } from "@prisma/client";
+import { deriveAndUpdatePostStatus } from "@/lib/posts/publishing";
+import { logger } from "@/lib/utils/logger";
+import type { Platform } from "@prisma/client";
 
-// ── Redis Connection ───────────────────────────────────────────────────────────
+export const PUBLISH_QUEUE_NAME = "postinger-publish";
 
 let redisConnection: IORedis | null = null;
 
@@ -22,15 +24,11 @@ export function getRedisConnection(): IORedis {
     });
 
     redisConnection.on("error", (err) => {
-      console.error("[Redis] Connection error:", err.message);
+      logger.warn(`Redis connection error: ${err.message}`);
     });
   }
   return redisConnection;
 }
-
-// ── Queue Definition ──────────────────────────────────────────────────────────
-
-export const PUBLISH_QUEUE_NAME = "postly-publish";
 
 let publishQueue: Queue | null = null;
 
@@ -52,8 +50,6 @@ export function getPublishQueue(): Queue {
   return publishQueue;
 }
 
-// ── Job Types ─────────────────────────────────────────────────────────────────
-
 export interface PublishJobData {
   publishingJobId: string;
   postId: string;
@@ -61,8 +57,6 @@ export interface PublishJobData {
   workspaceId: string;
   idempotencyKey: string;
 }
-
-// ── Enqueue a publishing job ──────────────────────────────────────────────────
 
 export async function enqueuePublishJob(
   jobData: PublishJobData,
@@ -76,46 +70,55 @@ export async function enqueuePublishJob(
       delay,
       jobId: jobData.idempotencyKey,
     });
-  } catch (err: any) {
-    console.error("[Queue] Failed to enqueue to Redis, will rely on DB scheduler:", err?.message);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    logger.warn(`Failed to enqueue job to Redis: ${msg}`);
   }
 }
 
-// ── Core Processor Function (Deterministic & Idempotent) ──────────────────────
+export async function removeJobFromQueue(jobId: string): Promise<void> {
+  try {
+    const queue = getPublishQueue();
+    const job = await queue.getJob(jobId);
+    if (job) {
+      await job.remove();
+    }
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    logger.warn(`Failed to remove job ${jobId} from queue: ${msg}`);
+  }
+}
 
 export async function processPublishJob(jobData: PublishJobData): Promise<void> {
-  const { publishingJobId, postId, socialAccountId, idempotencyKey } = jobData;
+  const { publishingJobId, postId, socialAccountId } = jobData;
   const startedAt = new Date();
 
-  // 1. Idempotency Check — if already completed, exit safely
-  const existingJob = await prisma.publishingJob.findUnique({
-    where: { id: publishingJobId },
+  // Atomic claim: only PENDING or RETRYING jobs can be claimed
+  const claim = await prisma.publishingJob.updateMany({
+    where: {
+      id: publishingJobId,
+      status: { in: ["PENDING", "RETRYING"] },
+    },
+    data: {
+      status: "RUNNING",
+      startedAt,
+      lockedAt: startedAt,
+      attempts: { increment: 1 },
+    },
   });
-  if (existingJob?.status === "COMPLETED") {
-    console.log(`[Queue] Job ${publishingJobId} already completed (idempotency skipped)`);
+
+  if (claim.count === 0) {
     return;
   }
 
-  // 2. Mark job as RUNNING & post as PROCESSING
-  await prisma.$transaction([
-    prisma.publishingJob.update({
-      where: { id: publishingJobId },
-      data: {
-        status: "RUNNING",
-        startedAt,
-        attempts: { increment: 1 },
-      },
-    }),
-    prisma.post.update({
-      where: { id: postId },
-      data: { status: "PROCESSING" },
-    }),
-  ]);
+  await prisma.post.update({
+    where: { id: postId },
+    data: { status: "PROCESSING" },
+  });
 
   const attemptStart = Date.now();
 
   try {
-    // 3. Fetch Post, Attachments, Channel-specific Variant, and Account
     const [post, socialAccount, variant] = await Promise.all([
       prisma.post.findUnique({
         where: { id: postId },
@@ -134,15 +137,13 @@ export async function processPublishJob(jobData: PublishJobData): Promise<void> 
     }
 
     if (!socialAccount.isConnected) {
-      throw new Error(`Social account @${socialAccount.handle} is disconnected. Please reconnect.`);
+      throw new Error(`Social account @${socialAccount.handle} is disconnected.`);
     }
 
-    // 4. Resolve Channel-Specific Customization (Variants)
     const publishBody = variant?.customBody?.trim() ? variant.customBody : post.body;
     const publishHashtags = variant?.customHashtags?.length ? variant.customHashtags : post.hashtags;
     const mediaUrls = post.mediaAttachments.map((m) => m.asset.url);
 
-    // 5. Execute Provider Adapter
     const provider = getProvider(socialAccount.platform as Platform);
     const result = await provider.publish({
       handle: socialAccount.handle,
@@ -158,7 +159,6 @@ export async function processPublishJob(jobData: PublishJobData): Promise<void> 
 
     const duration = Date.now() - attemptStart;
 
-    // 6. Record successful execution
     await prisma.$transaction([
       prisma.jobAttempt.create({
         data: {
@@ -172,25 +172,24 @@ export async function processPublishJob(jobData: PublishJobData): Promise<void> 
         data: {
           status: "COMPLETED",
           completedAt: new Date(),
+          lockedAt: null,
           lastError: null,
-        },
-      }),
-      prisma.post.update({
-        where: { id: postId },
-        data: {
-          status: "PUBLISHED",
-          publishedAt: new Date(),
         },
       }),
     ]);
 
-    console.log(`[Queue] Successfully published job ${publishingJobId} to ${socialAccount.platform} (@${socialAccount.handle})`);
-  } catch (err: any) {
+    await deriveAndUpdatePostStatus(postId);
+    logger.info(`Published job ${publishingJobId} to ${socialAccount.platform} (@${socialAccount.handle})`);
+  } catch (err: unknown) {
     const errorMessage = err instanceof Error ? err.message : "Unknown error";
     const duration = Date.now() - attemptStart;
 
-    const currentAttempts = (existingJob?.attempts ?? 0) + 1;
-    const isLastAttempt = currentAttempts >= (existingJob?.maxAttempts ?? 3);
+    const currentJob = await prisma.publishingJob.findUnique({
+      where: { id: publishingJobId },
+      select: { attempts: true, maxAttempts: true },
+    });
+    const currentAttempts = currentJob?.attempts ?? 1;
+    const isLastAttempt = currentAttempts >= (currentJob?.maxAttempts ?? 3);
 
     await prisma.$transaction([
       prisma.jobAttempt.create({
@@ -205,64 +204,76 @@ export async function processPublishJob(jobData: PublishJobData): Promise<void> 
         where: { id: publishingJobId },
         data: {
           status: isLastAttempt ? "FAILED" : "RETRYING",
+          lockedAt: null,
           lastError: errorMessage,
           nextRetryAt: isLastAttempt
             ? null
             : new Date(Date.now() + 5000 * Math.pow(2, currentAttempts - 1)),
         },
       }),
-      ...(isLastAttempt
-        ? [
-            prisma.post.update({
-              where: { id: postId },
-              data: { status: "FAILED" },
-            }),
-          ]
-        : []),
     ]);
 
+    await deriveAndUpdatePostStatus(postId);
     throw err;
   }
 }
 
-// ── Overdue Recovery Sweeper (Database Polling Fallback) ───────────────────────
+let isSweeperRunning = false;
 
 export async function sweepOverdueScheduledJobs(): Promise<number> {
-  const now = new Date();
-  const overdueJobs = await prisma.publishingJob.findMany({
-    where: {
-      status: { in: ["PENDING", "RETRYING"] },
-      scheduledAt: { lte: now },
-    },
-    take: 10,
-    include: {
-      post: true,
-      socialAccount: true,
-    },
-  });
+  if (isSweeperRunning) return 0;
+  isSweeperRunning = true;
 
-  if (overdueJobs.length === 0) return 0;
+  try {
+    const now = new Date();
 
-  console.log(`[Sweeper] Found ${overdueJobs.length} overdue publishing jobs to process`);
+    // 1. Recover jobs stuck in RUNNING for more than 5 minutes
+    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+    await prisma.publishingJob.updateMany({
+      where: {
+        status: "RUNNING",
+        lockedAt: { lt: fiveMinutesAgo },
+      },
+      data: {
+        status: "PENDING",
+        lockedAt: null,
+      },
+    });
 
-  for (const job of overdueJobs) {
-    try {
-      await processPublishJob({
-        publishingJobId: job.id,
-        postId: job.postId,
-        socialAccountId: job.socialAccountId,
-        workspaceId: job.post.workspaceId,
-        idempotencyKey: job.idempotencyKey,
-      });
-    } catch (e: any) {
-      console.error(`[Sweeper] Job ${job.id} failed:`, e?.message);
+    // 2. Query overdue PENDING jobs (overdue by > 1 minute with respect to nextRetryAt)
+    const overdueThreshold = new Date(Date.now() - 60 * 1000);
+    const overdueJobs = await prisma.publishingJob.findMany({
+      where: {
+        status: "PENDING",
+        scheduledAt: { lte: overdueThreshold },
+        OR: [{ nextRetryAt: null }, { nextRetryAt: { lte: now } }],
+      },
+      take: 10,
+      include: {
+        post: { select: { workspaceId: true } },
+      },
+    });
+
+    for (const job of overdueJobs) {
+      try {
+        await processPublishJob({
+          publishingJobId: job.id,
+          postId: job.postId,
+          socialAccountId: job.socialAccountId,
+          workspaceId: job.post.workspaceId,
+          idempotencyKey: job.idempotencyKey,
+        });
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "Unknown error";
+        logger.warn(`Sweeper job ${job.id} failed: ${msg}`);
+      }
     }
+
+    return overdueJobs.length;
+  } finally {
+    isSweeperRunning = false;
   }
-
-  return overdueJobs.length;
 }
-
-// ── Worker Initialization ─────────────────────────────────────────────────────
 
 let globalWorker: Worker | null = null;
 let sweeperInterval: NodeJS.Timeout | null = null;
@@ -283,28 +294,50 @@ export function startPublishWorker(): Worker | null {
     );
 
     globalWorker.on("failed", (job, err) => {
-      console.error(`[Queue] BullMQ job failed: ${job?.id}`, err?.message);
+      logger.warn(`BullMQ job failed: ${job?.id} - ${err?.message}`);
     });
 
     globalWorker.on("completed", (job) => {
-      console.log(`[Queue] BullMQ job completed: ${job?.id}`);
+      logger.info(`BullMQ job completed: ${job?.id}`);
     });
 
-    // Start background sweeper every 30 seconds for maximum reliability
     if (!sweeperInterval) {
       sweeperInterval = setInterval(() => {
         sweepOverdueScheduledJobs().catch((err) => {
-          console.error("[Sweeper] Error sweeping overdue jobs:", err?.message);
+          logger.warn(`Error sweeping overdue jobs: ${err?.message}`);
         });
       }, 30000);
-      // Run once immediately on startup
       sweepOverdueScheduledJobs().catch(() => {});
     }
 
-    console.log("[Queue] BullMQ Publish Worker and Overdue Sweeper started successfully");
     return globalWorker;
-  } catch (err: any) {
-    console.error("[Queue] Could not start BullMQ worker:", err?.message);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    logger.warn(`Could not start BullMQ worker: ${msg}`);
     return null;
   }
 }
+
+export async function stopPublishWorker(): Promise<void> {
+  if (sweeperInterval) {
+    clearInterval(sweeperInterval);
+    sweeperInterval = null;
+  }
+  if (globalWorker) {
+    await globalWorker.close();
+    globalWorker = null;
+  }
+  if (publishQueue) {
+    await publishQueue.close();
+    publishQueue = null;
+  }
+  if (redisConnection) {
+    try {
+      await redisConnection.quit();
+    } catch {
+      redisConnection.disconnect();
+    }
+    redisConnection = null;
+  }
+}
+

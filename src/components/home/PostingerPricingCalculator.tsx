@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Check, Zap, Sparkles, ArrowRight, ShieldCheck } from "lucide-react";
 import { PLAN_LIMITS } from "@/lib/plans/limits";
 
-export function BufferPricingCalculator() {
+export function PostingerPricingCalculator() {
   const [channels, setChannels] = useState(4);
   const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("annual");
 

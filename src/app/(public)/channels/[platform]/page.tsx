@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, Check, ShieldCheck, Sparkles, Plus, Clock, ExternalLink } from "lucide-react";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 
 interface ChannelData {
   title: string;
@@ -169,14 +169,14 @@ export default async function ChannelLandingPage({
       {/* Navigation */}
       <header className="border-b border-zinc-100 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
         <Link href="/" className="hover:opacity-80 transition-opacity">
-          <PostlyLogo size="md" />
+          <PostingerLogo size="md" />
         </Link>
         <div className="flex items-center gap-3">
           <Link href="/login" className="text-xs font-bold text-zinc-700 hover:text-zinc-900 px-3 py-2">
             Log in
           </Link>
           <Link
-            href="/signup"
+            href="/register"
             className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-xs"
           >
             Get Started Free
@@ -201,7 +201,7 @@ export default async function ChannelLandingPage({
 
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Link
-            href="/signup"
+            href="/register"
             className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition-all hover:scale-[1.02]"
           >
             Connect {channel.title} Free
@@ -279,7 +279,7 @@ export default async function ChannelLandingPage({
         </p>
         <div className="pt-2">
           <Link
-            href="/signup"
+            href="/register"
             className="inline-flex items-center gap-2 px-8 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md transition-all"
           >
             Get Started Free on Postinger

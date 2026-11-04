@@ -149,6 +149,21 @@ export const replyCommentSchema = z.object({
 
 // ── Start Page / Link-in-Bio Schemas ──────────────────────────────────────────
 
+export const httpUrl = z
+  .string()
+  .max(2048)
+  .refine(
+    (val) => {
+      try {
+        const u = new URL(val);
+        return u.protocol === "http:" || u.protocol === "https:";
+      } catch {
+        return false;
+      }
+    },
+    { message: "URL must start with http:// or https://" }
+  );
+
 export const updateStartPageSchema = z.object({
   workspaceId: z.string().min(1),
   handle: z
@@ -158,7 +173,7 @@ export const updateStartPageSchema = z.object({
     .regex(/^[a-z0-9_-]+$/, "Handle must only contain letters, numbers, underscores, and dashes"),
   title: z.string().min(1).max(80),
   bio: z.string().max(300).optional(),
-  avatarUrl: z.string().url().optional().nullable(),
+  avatarUrl: httpUrl.optional().nullable(),
   theme: z.string().default("warm-stone"),
   layout: z.enum(["stack", "grid"]).default("stack"),
   font: z.enum(["inter", "outfit", "serif", "mono"]).default("inter"),
@@ -179,7 +194,7 @@ export const updateStartPageSchema = z.object({
         "header",
       ]),
       title: z.string().max(100),
-      url: z.string().url().optional().nullable(),
+      url: httpUrl.optional().nullable(),
       icon: z.string().optional().nullable(),
       order: z.number().int().default(0),
       isActive: z.boolean().default(true),

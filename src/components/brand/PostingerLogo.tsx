@@ -11,7 +11,7 @@ interface PostingerLogoProps {
  * Original Postinger Brand Icon & Wordmark
  * Layered forward broadcast cards with precision emerald node.
  */
-export function PostlyLogo({
+export function PostingerLogo({
   className = "",
   size = "md",
   showWordmark = true,
@@ -83,6 +83,4 @@ export function PostlyLogo({
   );
 }
 
-// Named alias so imports for either PostlyLogo or PostingerLogo resolve cleanly
-export const PostingerLogo = PostlyLogo;
-export default PostlyLogo;
+export default PostingerLogo;

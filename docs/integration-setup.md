@@ -1,6 +1,6 @@
-# Postly Social Platform Integration Guide
+# Postinger Social Platform Integration Guide
 
-This guide details the OAuth requirements, developer portals, scopes, permissions, and environment configurations necessary to connect live social media platforms to Postly.
+This guide details the OAuth requirements, developer portals, scopes, permissions, and environment configurations necessary to connect live social media platforms to Postinger.
 
 ---
 
@@ -16,7 +16,7 @@ AUTH_TRUST_HOST=true
 AUTH_SECRET=your-32-byte-random-secret
 
 # Database & Queue
-DATABASE_URL=postgresql://user:pass@localhost:5432/postly_db
+DATABASE_URL=postgresql://user:pass@localhost:5432/postinger_db
 REDIS_URL=redis://localhost:6379
 
 # OpenAI / AI Assistant (Optional)
@@ -116,7 +116,7 @@ GOOGLE_CLIENT_SECRET=
 
 ## 3. Sandboxed & Simulated Mode
 
-When external OAuth credentials are not provided in `.env`, Postly gracefully transitions to **Simulated Mode**:
+When external OAuth credentials are not provided in `.env`, Postinger gracefully transitions to **Simulated Mode**:
 - Accounts can be connected via the Account directory with sample handles.
 - Publishing jobs are executed by the worker with realistic simulated latency and deterministic IDs (`tw_...`, `ig_...`, `li_...`).
 - Analytics records display connected workspace performance or clearly labeled sample data.

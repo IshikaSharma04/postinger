@@ -111,6 +111,13 @@ export async function DELETE(req: NextRequest) {
     return apiForbidden();
   }
 
-  await prisma.webhook.delete({ where: { id } });
+  const result = await prisma.webhook.deleteMany({
+    where: { id, workspaceId },
+  });
+
+  if (result.count === 0) {
+    return apiError("Webhook not found", 404);
+  }
+
   return apiSuccess({ deleted: true });
 }

@@ -1,4 +1,4 @@
-import { assertSafeUrl } from "@/lib/security/ssrf";
+import { safeFetch } from "@/lib/security/ssrf";
 import { prisma } from "@/lib/db/client";
 
 export interface FeedItem {
@@ -9,13 +9,11 @@ export interface FeedItem {
 }
 
 export async function parseRssFeed(feedUrl: string): Promise<FeedItem[]> {
-  await assertSafeUrl(feedUrl);
-
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 8000);
 
   try {
-    const res = await fetch(feedUrl, {
+    const res = await safeFetch(feedUrl, {
       signal: controller.signal,
       headers: {
         "User-Agent": "Postinger-FeedBot/1.0 (+https://postinger.app)",

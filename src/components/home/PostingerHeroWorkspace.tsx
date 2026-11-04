@@ -12,7 +12,7 @@ import {
   PinterestIcon,
 } from "@/components/icons/SocialBrandIcons";
 
-export function BufferHeroWorkspace() {
+export function PostingerHeroWorkspace() {
   const [email, setEmail] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {

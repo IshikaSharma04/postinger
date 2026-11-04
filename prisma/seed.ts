@@ -1,59 +1,23 @@
-/**
- * Postly — Seed Script
- * Creates realistic demo data for local development.
- * Run: npx prisma db seed
- *
- * ⚠️  Demo data only — never use in production.
- */
-
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("🌱 Seeding demo data...");
-
-  // ── Users ────────────────────────────────────────────────────────────────────
-
-  const passwordHash = await bcrypt.hash("Demo1234!", 12);
+  const demoEmail = "demo@postinger.app";
+  const demoPassword = process.env.DEMO_USER_PASSWORD || "Demo1234!";
+  const passwordHash = await bcrypt.hash(demoPassword, 12);
 
   const demoUser = await prisma.user.upsert({
-    where: { email: "demo@postly.app" },
-    update: { emailVerified: new Date() },
+    where: { email: demoEmail },
+    update: { passwordHash },
     create: {
-      name: "Alex Demo",
-      email: "demo@postly.app",
+      name: "Demo User",
+      email: demoEmail,
       passwordHash,
       emailVerified: new Date(),
     },
   });
-
-  const postingerUser = await prisma.user.upsert({
-    where: { email: "demo@postinger.app" },
-    update: { emailVerified: new Date() },
-    create: {
-      name: "Alex Demo",
-      email: "demo@postinger.app",
-      passwordHash,
-      emailVerified: new Date(),
-    },
-  });
-
-  const aliceUser = await prisma.user.upsert({
-    where: { email: "alice@postly.app" },
-    update: { emailVerified: new Date() },
-    create: {
-      name: "Alice Smith",
-      email: "alice@postly.app",
-      passwordHash,
-      emailVerified: new Date(),
-    },
-  });
-
-  console.log("✓ Created demo users");
-
-  // ── Workspace ─────────────────────────────────────────────────────────────────
 
   const workspace = await prisma.workspace.upsert({
     where: { slug: "demo-workspace" },
@@ -64,31 +28,17 @@ async function main() {
     },
   });
 
-  // Workspace members
   await prisma.workspaceMember.upsert({
     where: { workspaceId_userId: { workspaceId: workspace.id, userId: demoUser.id } },
     update: {},
     create: { workspaceId: workspace.id, userId: demoUser.id, role: "OWNER" },
   });
 
-  await prisma.workspaceMember.upsert({
-    where: { workspaceId_userId: { workspaceId: workspace.id, userId: postingerUser.id } },
-    update: {},
-    create: { workspaceId: workspace.id, userId: postingerUser.id, role: "OWNER" },
-  });
-
-  await prisma.workspaceMember.upsert({
-    where: { workspaceId_userId: { workspaceId: workspace.id, userId: aliceUser.id } },
-    update: {},
-    create: { workspaceId: workspace.id, userId: aliceUser.id, role: "ADMIN" },
-  });
-
-  // Seed onboarding state for demo users
   await prisma.onboardingState.upsert({
-    where: { userId: postingerUser.id },
+    where: { userId: demoUser.id },
     update: {},
     create: {
-      userId: postingerUser.id,
+      userId: demoUser.id,
       currentStep: 7,
       isCompleted: true,
       completedAt: new Date(),
@@ -102,29 +52,25 @@ async function main() {
     },
   });
 
-  console.log("✓ Created workspace and members");
-
-  // ── Social Accounts ───────────────────────────────────────────────────────────
-
   const twitter = await prisma.socialAccount.upsert({
-    where: { workspaceId_platform_handle: { workspaceId: workspace.id, platform: "TWITTER", handle: "demobrand" } },
+    where: { workspaceId_platform_handle: { workspaceId: workspace.id, platform: "TWITTER", handle: "demo_brand" } },
     update: {},
     create: {
       workspaceId: workspace.id,
       platform: "TWITTER",
-      handle: "demobrand",
+      handle: "demo_brand",
       displayName: "Demo Brand",
       credentials: { mock: true },
     },
   });
 
   const instagram = await prisma.socialAccount.upsert({
-    where: { workspaceId_platform_handle: { workspaceId: workspace.id, platform: "INSTAGRAM", handle: "demobrand.ig" } },
+    where: { workspaceId_platform_handle: { workspaceId: workspace.id, platform: "INSTAGRAM", handle: "demo_brand.ig" } },
     update: {},
     create: {
       workspaceId: workspace.id,
       platform: "INSTAGRAM",
-      handle: "demobrand.ig",
+      handle: "demo_brand.ig",
       displayName: "Demo Brand",
       credentials: { mock: true },
     },
@@ -142,15 +88,10 @@ async function main() {
     },
   });
 
-  console.log("✓ Created mock social accounts");
-
-  // ── Posts ─────────────────────────────────────────────────────────────────────
-
   const now = new Date();
-
   const postData = [
     {
-      body: "Excited to share our latest product update! We've added new scheduling features that make it easier than ever to plan your social content.",
+      body: "Product update: we added new scheduling tools to help plan social content.",
       hashtags: ["productupdate", "socialmedia", "scheduling"],
       status: "PUBLISHED" as const,
       scheduledAt: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
@@ -158,39 +99,25 @@ async function main() {
       accounts: [twitter.id, instagram.id],
     },
     {
-      body: "🎉 We just hit 1,000 users! Thank you to everyone who has supported us on this journey. Here's to the next milestone!",
-      hashtags: ["milestone", "community", "gratitude"],
+      body: "Milestone reached: thank you to everyone supporting our journey.",
+      hashtags: ["milestone", "community"],
       status: "PUBLISHED" as const,
       scheduledAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000),
       publishedAt: new Date(now.getTime() - 5 * 24 * 60 * 60 * 1000 + 2000),
       accounts: [twitter.id],
     },
     {
-      body: "Our team is attending Social Media Week next month! Come find us at booth #42 and let's chat about the future of content scheduling.",
-      hashtags: ["SMWLondon", "socialmedia", "networking"],
+      body: "Upcoming conference: find us next month to discuss the future of content scheduling.",
+      hashtags: ["conference", "networking"],
       status: "SCHEDULED" as const,
       scheduledAt: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000),
       accounts: [twitter.id, linkedin.id],
     },
     {
-      body: "Behind the scenes: here's how our small team manages social content for 50+ clients using Postly. Thread 🧵",
-      hashtags: ["behindthescenes", "contentmarketing", "workflow"],
-      status: "SCHEDULED" as const,
-      scheduledAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
-      accounts: [twitter.id, instagram.id, linkedin.id],
-    },
-    {
-      body: "Draft post: Ideas for Q4 campaign — need to finalize messaging before scheduling. Consider incorporating new brand colors and updated tone of voice guidelines.",
-      hashtags: ["Q4", "campaign", "planning"],
+      body: "Behind the scenes: how our team organizes social workflows with Postinger.",
+      hashtags: ["workflow", "planning"],
       status: "DRAFT" as const,
       accounts: [twitter.id],
-    },
-    {
-      body: "Partnership announcement coming soon. Collaborating with an amazing creator to bring you exclusive content over the next quarter.",
-      hashtags: ["partnership", "collaboration", "exclusive"],
-      status: "FAILED" as const,
-      scheduledAt: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000),
-      accounts: [twitter.id, instagram.id],
     },
   ];
 
@@ -210,7 +137,6 @@ async function main() {
       },
     });
 
-    // Create publishing jobs for non-draft posts
     if (pd.status !== "DRAFT" && pd.scheduledAt) {
       for (const accId of pd.accounts) {
         const idempotencyKey = `seed_${post.id}_${accId}`;
@@ -222,62 +148,36 @@ async function main() {
             socialAccountId: accId,
             scheduledAt: pd.scheduledAt,
             idempotencyKey,
-            status: pd.status === "PUBLISHED" ? "COMPLETED" : pd.status === "FAILED" ? "FAILED" : "PENDING",
-            attempts: pd.status === "PUBLISHED" ? 1 : pd.status === "FAILED" ? 3 : 0,
-            completedAt: pd.status === "PUBLISHED" ? (pd as Record<string, unknown>).publishedAt as Date : undefined,
-            lastError: pd.status === "FAILED" ? "[MOCK] Simulated publishing failure for demo" : undefined,
+            status: pd.status === "PUBLISHED" ? "COMPLETED" : "PENDING",
+            attempts: pd.status === "PUBLISHED" ? 1 : 0,
+            completedAt: (pd as Record<string, unknown>).publishedAt as Date | undefined,
           },
         });
 
-        // Add attempt records for completed/failed jobs
         if (pd.status === "PUBLISHED") {
           await prisma.jobAttempt.create({
             data: {
               jobId: job.id,
               status: "COMPLETED",
-              duration: Math.floor(800 + Math.random() * 400),
+              duration: 950,
             },
           });
-        } else if (pd.status === "FAILED") {
-          for (let i = 0; i < 3; i++) {
-            await prisma.jobAttempt.create({
-              data: {
-                jobId: job.id,
-                status: "FAILED",
-                error: "[MOCK] Simulated provider error — connection timeout",
-                duration: Math.floor(1000 + Math.random() * 2000),
-                attemptedAt: new Date(now.getTime() - (24 - i * 8) * 60 * 60 * 1000),
-              },
-            });
-          }
         }
       }
     }
   }
 
-  console.log("✓ Created demo posts and publishing jobs");
-
-  // ── Audit Logs ────────────────────────────────────────────────────────────────
-
   await prisma.auditLog.createMany({
     data: [
       { workspaceId: workspace.id, userId: demoUser.id, action: "USER_REGISTERED", entity: "user", entityId: demoUser.id },
-      { workspaceId: workspace.id, userId: demoUser.id, action: "ACCOUNT_CONNECTED", entity: "socialAccount", entityId: twitter.id, metadata: { platform: "TWITTER", handle: "demobrand" } },
-      { workspaceId: workspace.id, userId: demoUser.id, action: "ACCOUNT_CONNECTED", entity: "socialAccount", entityId: instagram.id, metadata: { platform: "INSTAGRAM", handle: "demobrand.ig" } },
-      { workspaceId: workspace.id, userId: aliceUser.id, action: "POST_CREATED", entity: "post", metadata: { status: "PUBLISHED" } },
+      { workspaceId: workspace.id, userId: demoUser.id, action: "ACCOUNT_CONNECTED", entity: "socialAccount", entityId: twitter.id, metadata: { platform: "TWITTER", handle: "demo_brand" } },
     ],
   });
-
-  console.log("✓ Created audit logs");
-  console.log("");
-  console.log("🎉 Seed complete!");
-  console.log("   Demo login: demo@postly.app / Demo1234!");
-  console.log("   Alice login: alice@postly.app / Demo1234!");
 }
 
 main()
   .catch((err) => {
-    console.error("Seed failed:", err.message);
+    console.error("Seed error:", err.message);
     process.exit(1);
   })
   .finally(() => prisma.$disconnect());

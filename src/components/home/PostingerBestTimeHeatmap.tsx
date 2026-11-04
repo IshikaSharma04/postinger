@@ -27,7 +27,7 @@ function getIntensityClass(val: number): string {
   return "bg-zinc-100 text-zinc-400";
 }
 
-export function BufferBestTimeHeatmap() {
+export function PostingerBestTimeHeatmap() {
   const [hoveredCell, setHoveredCell] = useState<{
     day: string;
     hour: string;
@@ -38,15 +38,15 @@ export function BufferBestTimeHeatmap() {
     <div className="w-full max-w-5xl mx-auto rounded-3xl bg-white border border-zinc-200/90 shadow-xl shadow-zinc-900/5 p-6 sm:p-8">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-orange-50 text-orange-700 border border-orange-200/60 mb-2">
-            <Flame className="w-3.5 h-3.5 fill-orange-500 text-orange-500" />
-            Buffer-Inspired Audience Intelligence
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200/60 mb-2">
+            <Flame className="w-3.5 h-3.5 fill-blue-500 text-blue-500" />
+            Posting Activity Heatmap
           </div>
           <h3 className="text-xl sm:text-2xl font-bold text-zinc-900">
-            Publish exactly when your followers are awake
+            Weekly Publishing Distribution
           </h3>
           <p className="text-sm text-zinc-500 mt-1">
-            Machine learning analyzes engagement patterns across your accounts to recommend optimal queue slots.
+            Illustrative activity heatmap showing slot frequency and publishing distribution by day and time.
           </p>
         </div>
 

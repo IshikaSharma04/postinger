@@ -2,7 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
 import { prisma } from "@/lib/db/client";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 import {
   TwitterXIcon,
   LinkedInIcon,
@@ -142,7 +142,7 @@ export default async function PublicStartPage({ params }: PageProps) {
       <footer className="text-center pb-6 text-xs text-zinc-500 flex items-center justify-center gap-2">
         <span>Powered by</span>
         <Link href="/" className="inline-flex items-center gap-1 font-bold text-zinc-900 hover:underline">
-          <PostlyLogo size="sm" showWordmark={true} />
+          <PostingerLogo size="sm" showWordmark={true} />
         </Link>
       </footer>
     </div>

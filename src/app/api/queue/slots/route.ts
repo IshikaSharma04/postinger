@@ -119,9 +119,13 @@ export async function DELETE(req: NextRequest) {
   });
   if (!member) return apiForbidden();
 
-  await prisma.postingScheduleSlot.delete({
-    where: { id },
+  const result = await prisma.postingScheduleSlot.deleteMany({
+    where: { id, workspaceId },
   });
+
+  if (result.count === 0) {
+    return apiError("Slot not found", 404);
+  }
 
   return apiSuccess({ deleted: true });
 }

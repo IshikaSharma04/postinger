@@ -5,8 +5,7 @@ import { apiSuccess, apiError, apiUnauthorized, apiForbidden } from "@/lib/utils
 import { auth } from "@/lib/auth/config";
 import { createPostSchema } from "@/lib/validators/schemas";
 import { createAuditLog } from "@/lib/utils/audit";
-import { enqueuePublishJob, processPublishJob } from "@/lib/queue/worker";
-import { v4 as uuidv4 } from "uuid";
+import { createJobsForPost, enqueueJobsAfterCommit } from "@/lib/posts/publishing";
 
 import { getNextQueueSlot } from "@/lib/utils/queue-slot";
 
@@ -232,8 +231,8 @@ export async function POST(req: NextRequest) {
     targetScheduledAt = data.scheduledAt ?? null;
   }
 
-  // Enforce server-side scheduled posts limit per channel (exempt test env)
-  if (finalStatus === "SCHEDULED" && process.env.NODE_ENV !== "test") {
+  // Enforce server-side scheduled posts limit per channel
+  if (finalStatus === "SCHEDULED") {
     const ws = await prisma.workspace.findUnique({ where: { id: data.workspaceId }, select: { plan: true } });
     const limits = getPlanLimits(ws?.plan);
     const existingScheduled = await prisma.post.count({
@@ -248,6 +247,7 @@ export async function POST(req: NextRequest) {
   }
 
   const userId = session.user.id;
+  let jobsToEnqueue: Awaited<ReturnType<typeof createJobsForPost>> = [];
 
   const post = await prisma.$transaction(async (tx) => {
     // 1. Create main Post record
@@ -299,47 +299,24 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // 3. Create publishing jobs for SCHEDULED or PUBLISH_NOW posts
+    // 3. Create publishing jobs inside transaction for SCHEDULED or PUBLISH_NOW posts
     if ((finalStatus === "SCHEDULED" || isPublishNow) && targetScheduledAt) {
-      for (const account of newPost.postAccounts) {
-        const idempotencyKey = uuidv4();
-        const job = await tx.publishingJob.create({
-          data: {
-            postId: newPost.id,
-            socialAccountId: account.socialAccountId,
-            scheduledAt: targetScheduledAt,
-            idempotencyKey,
-            status: isPublishNow ? "RUNNING" : "PENDING",
-            startedAt: isPublishNow ? new Date() : null,
-          },
-        });
-
-        // Enqueue to Redis via BullMQ worker
-        await enqueuePublishJob(
-          {
-            publishingJobId: job.id,
-            postId: newPost.id,
-            socialAccountId: account.socialAccountId,
-            workspaceId: data.workspaceId,
-            idempotencyKey,
-          },
-          targetScheduledAt
-        );
-
-        if (isPublishNow) {
-          processPublishJob({
-            publishingJobId: job.id,
-            postId: newPost.id,
-            socialAccountId: account.socialAccountId,
-            workspaceId: data.workspaceId,
-            idempotencyKey,
-          }).catch((err) => console.error("[PublishNow] Execution error:", err?.message));
-        }
-      }
+      jobsToEnqueue = await createJobsForPost(tx, {
+        postId: newPost.id,
+        workspaceId: data.workspaceId,
+        socialAccountIds: data.socialAccountIds,
+        scheduledAt: targetScheduledAt,
+        isPublishNow,
+      });
     }
 
     return newPost;
   });
+
+  // 4. Enqueue jobs to worker queue after transaction successfully commits
+  if (jobsToEnqueue.length > 0) {
+    await enqueueJobsAfterCommit(jobsToEnqueue);
+  }
 
 
   await createAuditLog({

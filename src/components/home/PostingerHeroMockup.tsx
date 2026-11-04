@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Image from "next/image";
 import {
   Calendar,
   Layers,
@@ -21,7 +20,7 @@ interface TabItem {
   title: string;
   subtitle: string;
   icon: React.ComponentType<{ className?: string }>;
-  image: string;
+  image: string | null;
   badgeText: string;
   accentColor: string;
 }
@@ -32,7 +31,7 @@ const TABS: TabItem[] = [
     title: "Plan & Publish",
     subtitle: "Visual calendar & queue slots",
     icon: Calendar,
-    image: "/images/buffer-dashboard.jpg",
+    image: null,
     badgeText: "3 Posts Scheduled Today",
     accentColor: "from-blue-600 to-indigo-600",
   },
@@ -41,22 +40,22 @@ const TABS: TabItem[] = [
     title: "Multi-Channel Studio",
     subtitle: "Customize per network side-by-side",
     icon: Layers,
-    image: "/images/buffer-composer.jpg",
+    image: null,
     badgeText: "Twitter · LinkedIn · Instagram",
     accentColor: "from-sky-500 to-blue-600",
   },
   {
     id: "analytics",
-    title: "Analytics & Heatmap",
+    title: "Analytics & Best Time",
     subtitle: "Best time to post & audience spikes",
     icon: BarChart3,
-    image: "/images/buffer-analytics.jpg",
+    image: null,
     badgeText: "Best Time: 8:15 PM Peak 🔥",
     accentColor: "from-violet-600 to-purple-600",
   },
 ];
 
-export function BufferHeroMockup() {
+export function PostingerHeroMockup() {
   const [activeTab, setActiveTab] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -163,22 +162,22 @@ export function BufferHeroMockup() {
           </div>
         </div>
 
-        {/* Dynamic Image Container with Smooth Fade Transition */}
-        <div className="relative aspect-[16/9] w-full rounded-2xl overflow-hidden bg-zinc-100 border border-zinc-100 shadow-inner group">
-          <Image
-            src={currentTab.image}
-            alt={currentTab.title}
-            fill
-            priority
-            sizes="(max-width: 1200px) 100vw, 1024px"
-            className="object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.02]"
-          />
-
-          {/* Subtle gradient vignette to blend */}
+        {/* Dynamic preview area */}
+        <div className={`relative aspect-[16/9] w-full rounded-2xl overflow-hidden border border-zinc-200 shadow-inner bg-gradient-to-br ${currentTab.accentColor} group`}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white/90">
+            <currentTab.icon className="w-14 h-14 opacity-80" />
+            <div className="text-center px-6">
+              <p className="text-lg font-bold">{currentTab.title}</p>
+              <p className="text-sm opacity-70 mt-1">{currentTab.subtitle}</p>
+            </div>
+            <span className="px-4 py-1.5 rounded-full bg-white/20 backdrop-blur text-xs font-semibold border border-white/30">
+              {currentTab.badgeText}
+            </span>
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent pointer-events-none" />
         </div>
 
-        {/* ── FLOATING MOVING ELEMENTS (Buffer Style) ── */}
+        {/* ── FLOATING MOVING ELEMENTS ── */}
 
         {/* Floating Badge 1: Top Left - Best Time Pill */}
         <div className="absolute -top-4 -left-3 sm:-left-6 z-20 animate-float-slow hidden xs:flex items-center gap-2.5 bg-white/95 backdrop-blur-md px-3.5 py-2 rounded-2xl shadow-xl shadow-zinc-900/10 border border-zinc-200/80">

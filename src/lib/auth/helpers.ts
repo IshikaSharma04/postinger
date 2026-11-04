@@ -1,50 +1,41 @@
 import { auth } from "@/lib/auth/config";
 import { prisma } from "@/lib/db/client";
-import { Role } from "@prisma/client";
+import { Role, Workspace, WorkspaceMember } from "@prisma/client";
 import { redirect } from "next/navigation";
+import { apiForbidden } from "@/lib/utils/api";
+import { NextResponse } from "next/server";
 
-/** Get the current session user, or redirect to login */
 export async function requireAuth() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
   return session.user;
 }
 
-/** Get the current user's workspace membership and enforce role */
-export async function requireWorkspaceAccess(
-  workspaceId: string,
-  minimumRole: Role = "MEMBER"
-) {
-  const user = await requireAuth();
+export type WorkspaceMemberWithWorkspace = WorkspaceMember & { workspace: Workspace };
 
+export async function requireWorkspaceMember(
+  userId: string,
+  workspaceId: string,
+  check?: (role: Role) => boolean
+): Promise<{ member: WorkspaceMemberWithWorkspace; error: null } | { member: null; error: NextResponse }> {
   const member = await prisma.workspaceMember.findUnique({
     where: {
-      workspaceId_userId: { workspaceId, userId: user.id! },
+      workspaceId_userId: { workspaceId, userId },
     },
     include: { workspace: true },
   });
 
   if (!member) {
-    throw new Error("ACCESS_DENIED");
+    return { member: null, error: apiForbidden("Access denied: not a workspace member") };
   }
 
-  const roleHierarchy: Record<Role, number> = {
-    VIEWER: 0,
-    MEMBER: 1,
-    CONTRIBUTOR: 2,
-    MANAGER: 3,
-    ADMIN: 4,
-    OWNER: 5,
-  };
-
-  if (roleHierarchy[member.role] < roleHierarchy[minimumRole]) {
-    throw new Error("INSUFFICIENT_ROLE");
+  if (check && !check(member.role)) {
+    return { member: null, error: apiForbidden("Forbidden: insufficient permissions") };
   }
 
-  return { user, member, workspace: member.workspace };
+  return { member, error: null };
 }
 
-/** Get the first workspace for the current user */
 export async function getDefaultWorkspace(userId: string) {
   const member = await prisma.workspaceMember.findFirst({
     where: { userId },

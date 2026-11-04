@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Mail, RefreshCw, Trash2, ExternalLink, ArrowLeft, ShieldCheck } from "lucide-react";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 
 interface CapturedEmail {
   id: string;
@@ -17,6 +18,10 @@ interface CapturedEmail {
 }
 
 export default function DevMailboxPage() {
+  if (process.env.NODE_ENV === "production") {
+    notFound();
+  }
+
   const [emails, setEmails] = useState<CapturedEmail[]>([]);
   const [selectedEmail, setSelectedEmail] = useState<CapturedEmail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,7 +62,7 @@ export default function DevMailboxPage() {
       <header className="bg-white border-b border-zinc-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/" className="hover:opacity-80 transition-opacity">
-            <PostlyLogo size="sm" />
+            <PostingerLogo size="sm" />
           </Link>
           <span className="text-zinc-300">/</span>
           <div className="flex items-center gap-2">
@@ -187,10 +192,9 @@ export default function DevMailboxPage() {
               </div>
 
               {/* Message Body */}
-              <div
-                className="flex-1 prose prose-sm max-w-none text-zinc-700 overflow-y-auto"
-                dangerouslySetInnerHTML={{ __html: selectedEmail.html || `<p>${selectedEmail.text}</p>` }}
-              />
+              <div className="flex-1 whitespace-pre-wrap font-sans text-sm text-zinc-700 overflow-y-auto bg-zinc-50 p-4 rounded-xl border border-zinc-200">
+                {selectedEmail.text || "No text content"}
+              </div>
             </div>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-8 text-zinc-400">

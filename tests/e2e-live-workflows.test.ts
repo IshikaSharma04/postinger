@@ -1,17 +1,21 @@
-import { test, describe } from "node:test";
+import { test, describe, after } from "node:test";
 import assert from "node:assert/strict";
 import { execSync } from "node:child_process";
 import fs from "node:fs";
 import { prisma } from "../src/lib/db/client";
+import { startPublishWorker, stopPublishWorker } from "../src/lib/queue/worker";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-const COOKIE_FILE = "/tmp/postly_test_cookies.txt";
+const COOKIE_FILE = "/tmp/postinger_test_cookies.txt";
 
-describe("Postly Live End-to-End Buffer Workflows", async () => {
+describe("Postinger Live End-to-End Buffer Workflows", async () => {
   let cookieHeader = "";
   let workspaceId = "";
   let accountId = "";
   let draftPostId = "";
+
+  // Ensure publish worker is active to consume jobs
+  startPublishWorker();
 
   test("1. Authenticates demo user and obtains session cookie", async () => {
     // Clean any prior cookie file
@@ -24,7 +28,7 @@ describe("Postly Live End-to-End Buffer Workflows", async () => {
 
     execSync(
       `curl -s -b "${COOKIE_FILE}" -c "${COOKIE_FILE}" -X POST "${BASE_URL}/api/auth/callback/credentials" ` +
-        `-d "csrfToken=${csrfData.csrfToken}&email=demo@postly.app&password=Demo1234!" -o /dev/null`
+        `-d "csrfToken=${csrfData.csrfToken}&email=demo@postinger.app&password=Demo1234!" -o /dev/null`
     );
 
     const cookieContent = fs.readFileSync(COOKIE_FILE, "utf-8");
@@ -37,7 +41,7 @@ describe("Postly Live End-to-End Buffer Workflows", async () => {
 
     // Verify user & default workspace in DB
     const user = await prisma.user.findUnique({
-      where: { email: "demo@postly.app" },
+      where: { email: "demo@postinger.app" },
       include: {
         workspaceMembers: {
           include: { workspace: true },
@@ -71,7 +75,7 @@ describe("Postly Live End-to-End Buffer Workflows", async () => {
       },
       body: JSON.stringify({
         workspaceId,
-        body: "Testing our Buffer-style publishing engine on Postly! 🚀 #buildinpublic",
+        body: "Testing our Buffer-style publishing engine on Postinger! 🚀 #buildinpublic",
         accountIds: [accountId],
         action: "DRAFT",
       }),
@@ -82,7 +86,7 @@ describe("Postly Live End-to-End Buffer Workflows", async () => {
     const post = body.data || body;
     assert.ok(post.id);
     assert.equal(post.status, "DRAFT");
-    assert.equal(post.body, "Testing our Buffer-style publishing engine on Postly! 🚀 #buildinpublic");
+    assert.equal(post.body, "Testing our Buffer-style publishing engine on Postinger! 🚀 #buildinpublic");
     draftPostId = post.id;
   });
 
@@ -100,7 +104,7 @@ describe("Postly Live End-to-End Buffer Workflows", async () => {
 
   test("5. Updates and schedules the draft post for a future date/time", async () => {
     const scheduledAt = new Date(Date.now() + 86400000 * 2).toISOString(); // 2 days ahead
-    const updatedBody = "Testing our Buffer-style publishing engine on Postly! 🚀 #buildinpublic — Updated and ready for queue";
+    const updatedBody = "Testing our Buffer-style publishing engine on Postinger! 🚀 #buildinpublic — Updated and ready for queue";
 
     const res = await fetch(`${BASE_URL}/api/posts/${draftPostId}`, {
       method: "PATCH",
@@ -190,7 +194,7 @@ describe("Postly Live End-to-End Buffer Workflows", async () => {
       },
       body: JSON.stringify({
         workspaceId,
-        body: "Live instant publish test via Postly worker! ⚡ #instantpublishing",
+        body: "Live instant publish test via Postinger worker! ⚡ #instantpublishing",
         accountIds: [accountId],
         action: "PUBLISH_NOW",
       }),
@@ -201,20 +205,26 @@ describe("Postly Live End-to-End Buffer Workflows", async () => {
     const post = body.data || body;
     assert.ok(post.id);
 
-    // Give worker job a moment to complete
-    await new Promise((r) => setTimeout(r, 1200));
-
-    // Verify post status in database
-    const publishedPost = await prisma.post.findUnique({
-      where: { id: post.id },
-      include: {
-        publishingJobs: true,
-      },
-    });
+    // Wait for worker job to complete
+    let publishedPost = null;
+    for (let i = 0; i < 25; i++) {
+      await new Promise((r) => setTimeout(r, 200));
+      publishedPost = await prisma.post.findUnique({
+        where: { id: post.id },
+        include: {
+          publishingJobs: true,
+        },
+      });
+      if (publishedPost?.status === "PUBLISHED") break;
+    }
 
     assert.ok(publishedPost);
     assert.equal(publishedPost.status, "PUBLISHED", "Post must transition to PUBLISHED status");
     assert.ok(publishedPost.publishingJobs.length > 0, "Publishing job record must exist");
     assert.equal(publishedPost.publishingJobs[0].status, "COMPLETED");
+  });
+
+  after(async () => {
+    await stopPublishWorker();
   });
 });

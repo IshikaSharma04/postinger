@@ -4,7 +4,7 @@ import React, { useEffect, useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { CheckCircle2, XCircle, Loader2, ArrowRight, Mail } from "lucide-react";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
@@ -49,7 +49,7 @@ function VerifyEmailContent() {
     <div className="min-h-screen bg-zinc-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md text-center mb-6">
         <Link href="/" className="inline-block hover:opacity-80 transition-opacity">
-          <PostlyLogo size="lg" />
+          <PostingerLogo size="lg" />
         </Link>
       </div>
 

@@ -263,10 +263,10 @@ export default function AccountsPage() {
 
                   <div className="flex items-center gap-2 mb-3">
                     <Badge variant="default" size="sm">
-                      SANDBOX
+                      Simulated
                     </Badge>
                     <span className="text-[11px] text-zinc-400 truncate">
-                      {acc.providerInfo?.description ?? "Ready for automated publishing"}
+                      Publishing is simulated — no real OAuth token stored
                     </span>
                   </div>
                 </div>

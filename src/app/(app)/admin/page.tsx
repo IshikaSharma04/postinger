@@ -8,7 +8,7 @@ export const metadata = {
   robots: { index: false, follow: false },
 };
 
-const SYSTEM_ADMIN_EMAILS = (process.env.SYSTEM_ADMIN_EMAILS ?? "admin@postinger.app,admin@postly.app")
+const SYSTEM_ADMIN_EMAILS = (process.env.SYSTEM_ADMIN_EMAILS ?? "admin@postinger.app")
   .split(",")
   .map((e) => e.trim().toLowerCase());
 

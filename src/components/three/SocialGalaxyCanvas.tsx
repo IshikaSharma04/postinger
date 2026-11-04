@@ -42,7 +42,7 @@ export function SocialGalaxyCanvas({
     // 1. Central Glowing Iridescent Sphere
     const coreGeo = new THREE.IcosahedronGeometry(1.6, 3);
     const coreMat = new THREE.MeshPhysicalMaterial({
-      color: 0x98e376, // Postly brand lime green
+      color: 0x98e376, // Postinger brand lime green
       emissive: 0x1e3a8a, // Deep blue glow
       emissiveIntensity: 0.85,
       roughness: 0.15,
@@ -91,7 +91,7 @@ export function SocialGalaxyCanvas({
       0x0a66c2, // LinkedIn (Cobalt)
       0x00f2fe, // TikTok (Cyan)
       0xff0000, // YouTube (Red)
-      0x98e376, // Postly Hub (Lime green)
+      0x98e376, // Postinger Hub (Lime green)
     ];
 
     const satCount = Math.max(3, Math.min(connectedCount, 6));

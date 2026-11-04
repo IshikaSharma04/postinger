@@ -58,7 +58,7 @@ export default function AnalyticsHistoryPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [channelFilter, setChannelFilter] = useState("ALL");
-  const [activeTab, setActiveTab] = useState<"METRICS" | "BENCHMARKS" | "LOGS">("METRICS");
+  const [activeTab, setActiveTab] = useState<"METRICS" | "LOGS">("METRICS");
 
   const { data, isLoading } = useQuery({
     queryKey: ["posts", workspace?.id, "analytics", search, statusFilter],
@@ -181,15 +181,6 @@ export default function AnalyticsHistoryPage() {
               Overview
             </button>
             <button
-              onClick={() => setActiveTab("BENCHMARKS")}
-              className={cn(
-                "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                activeTab === "BENCHMARKS" ? "bg-white text-zinc-900 shadow-xs font-bold" : "text-zinc-500 hover:text-zinc-900"
-              )}
-            >
-              Benchmarks
-            </button>
-            <button
               onClick={() => setActiveTab("LOGS")}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-semibold transition-all",
@@ -222,10 +213,7 @@ export default function AnalyticsHistoryPage() {
         </div>
 
         <div className="text-xs text-zinc-400 flex items-center gap-2">
-          <span className="flex items-center gap-1 text-emerald-600 font-bold">
-            <TrendingUp className="w-3.5 h-3.5" /> +14.2% vs previous 30 days
-          </span>
-          <span>· Last sync 2m ago</span>
+          <span>{posts.length} posts loaded</span>
         </div>
       </div>
 
@@ -318,53 +306,7 @@ export default function AnalyticsHistoryPage() {
         })}
       </div>
 
-      {activeTab === "BENCHMARKS" ? (
-        /* ── Industry Benchmarks Section (Clearly Labeled Sample Data) ── */
-        <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-zinc-100">
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold text-zinc-900">Industry Benchmarks</h3>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                  Sample Industry Baseline Data
-                </span>
-              </div>
-              <p className="text-xs text-zinc-500 mt-0.5">
-                Compare your workspace posting cadence and reach against average 2026 SaaS, creator, and brand benchmarks.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-4 rounded-xl border border-zinc-100 bg-zinc-50/50 space-y-2">
-              <span className="text-xs font-bold text-zinc-600">Weekly Frequency</span>
-              <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-extrabold text-zinc-900">4.8 posts</span>
-                <span className="text-xs text-zinc-500">Industry: 5.2/wk</span>
-              </div>
-              <p className="text-[11px] text-zinc-500">You are within 92% of the average creator posting cadence.</p>
-            </div>
-
-            <div className="p-4 rounded-xl border border-zinc-100 bg-zinc-50/50 space-y-2">
-              <span className="text-xs font-bold text-zinc-600">Avg Engagement Rate</span>
-              <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-extrabold text-emerald-600">3.4%</span>
-                <span className="text-xs text-zinc-500">Industry: 2.1%</span>
-              </div>
-              <p className="text-[11px] text-zinc-500">+1.3% above industry median for B2B &amp; design brands.</p>
-            </div>
-
-            <div className="p-4 rounded-xl border border-zinc-100 bg-zinc-50/50 space-y-2">
-              <span className="text-xs font-bold text-zinc-600">Queue Buffer Safety</span>
-              <div className="flex items-baseline justify-between">
-                <span className="text-2xl font-extrabold text-blue-600">5.5 days</span>
-                <span className="text-xs text-zinc-500">Target: 7 days</span>
-              </div>
-              <p className="text-[11px] text-zinc-500">Aim for 7 days of scheduled content to insulate against busy weeks.</p>
-            </div>
-          </div>
-        </div>
-      ) : activeTab === "METRICS" ? (
+      {activeTab === "METRICS" ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Left: Platform Distribution Breakdown */}
           <div className="lg:col-span-7 bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs space-y-5">

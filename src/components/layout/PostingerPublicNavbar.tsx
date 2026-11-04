@@ -17,7 +17,7 @@ import {
   X,
   ExternalLink,
 } from "lucide-react";
-import { PostlyLogo } from "@/components/brand/PostlyLogo";
+import { PostingerLogo } from "@/components/brand/PostingerLogo";
 import {
   TwitterXIcon,
   LinkedInIcon,
@@ -27,7 +27,7 @@ import {
   PinterestIcon,
 } from "@/components/icons/SocialBrandIcons";
 
-export function PostlyNavbar() {
+export function PostingerPublicNavbar() {
   const [featuresOpen, setFeaturesOpen] = useState(false);
   const [integrationsOpen, setIntegrationsOpen] = useState(false);
   const [madeForOpen, setMadeForOpen] = useState(false);
@@ -40,7 +40,7 @@ export function PostlyNavbar() {
         {/* Brand Logo & Desktop Nav Links */}
         <div className="flex items-center gap-9">
           <Link href="/" className="group focus:outline-none flex items-center gap-2.5">
-            <PostlyLogo size="md" />
+            <PostingerLogo size="md" />
           </Link>
 
           {/* Desktop Navigation Links */}
