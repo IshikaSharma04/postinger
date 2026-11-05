@@ -46,8 +46,9 @@ function LoginForm() {
       }
 
       window.location.href = callbackUrl || "/posts";
-    } catch (err: any) {
-      if (err?.message?.includes("NEXT_REDIRECT") || err?.digest?.includes("NEXT_REDIRECT")) {
+    } catch (err: unknown) {
+      const e = err as { message?: string; digest?: string } | null;
+      if (e?.message?.includes("NEXT_REDIRECT") || e?.digest?.includes("NEXT_REDIRECT")) {
         window.location.href = callbackUrl || "/posts";
         return;
       }

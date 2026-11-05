@@ -3,32 +3,43 @@ import { prisma } from "@/lib/db/client";
 import { Prisma } from "@prisma/client";
 import { apiSuccess, apiError, apiUnauthorized, apiForbidden } from "@/lib/utils/api";
 import { auth } from "@/lib/auth/config";
-import { createPostSchema } from "@/lib/validators/schemas";
+import {
+  createPostSchema,
+  paginationSchema,
+  postStatusEnum,
+  platformEnum,
+} from "@/lib/validators/schemas";
 import { createAuditLog } from "@/lib/utils/audit";
 import { createJobsForPost, enqueueJobsAfterCommit } from "@/lib/posts/publishing";
-
 import { getNextQueueSlot } from "@/lib/utils/queue-slot";
-
 import { getNextAvailablePostingDate } from "@/lib/queue/timezone";
 import { getPlanLimits } from "@/lib/plans/limits";
 
 // GET /api/posts?workspaceId=...&status=...&page=...
-
 export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) return apiUnauthorized();
 
   const { searchParams } = req.nextUrl;
   const workspaceId = searchParams.get("workspaceId");
-  const status = searchParams.get("status");
-  const platform = searchParams.get("platform");
+  if (!workspaceId) return apiError("workspaceId is required");
+
+  const paginationParsed = paginationSchema.safeParse({
+    page: searchParams.get("page") ?? 1,
+    limit: searchParams.get("limit") ?? 20,
+  });
+  const { page, limit } = paginationParsed.success
+    ? paginationParsed.data
+    : { page: 1, limit: 20 };
+
+  const rawStatus = searchParams.get("status");
+  const rawPlatform = searchParams.get("platform");
+  const statusParsed = rawStatus ? postStatusEnum.safeParse(rawStatus) : null;
+  const platformParsed = rawPlatform ? platformEnum.safeParse(rawPlatform) : null;
+
   const tag = searchParams.get("tag");
   const postFormat = searchParams.get("postFormat");
   const search = searchParams.get("search");
-  const page = Math.max(1, parseInt(searchParams.get("page") ?? "1"));
-  const limit = Math.min(50, parseInt(searchParams.get("limit") ?? "20"));
-
-  if (!workspaceId) return apiError("workspaceId is required");
 
   // Verify workspace membership (Tenant Isolation)
   const member = await prisma.workspaceMember.findUnique({
@@ -38,7 +49,7 @@ export async function GET(req: NextRequest) {
 
   const where: Prisma.PostWhereInput = {
     workspaceId,
-    ...(status ? { status: status as never } : {}),
+    ...(statusParsed?.success ? { status: statusParsed.data } : {}),
     ...(postFormat ? { postFormat } : {}),
     ...(tag ? { tags: { has: tag } } : {}),
     ...(search
@@ -49,11 +60,11 @@ export async function GET(req: NextRequest) {
           ],
         }
       : {}),
-    ...(platform
+    ...(platformParsed?.success
       ? {
           postAccounts: {
             some: {
-              socialAccount: { platform: platform as never },
+              socialAccount: { platform: platformParsed.data },
             },
           },
         }
@@ -78,34 +89,9 @@ export async function GET(req: NextRequest) {
             },
           },
         },
-        variants: {
-          include: {
-            socialAccount: {
-              select: { id: true, platform: true, handle: true },
-            },
-          },
-        },
         mediaAttachments: {
           include: { asset: true },
           orderBy: { order: "asc" },
-        },
-        publishingJobs: {
-          orderBy: { createdAt: "desc" },
-          take: 5,
-        },
-        approvalRequests: {
-          include: {
-            requestedBy: { select: { id: true, name: true, email: true } },
-            reviewer: { select: { id: true, name: true, email: true } },
-          },
-          orderBy: { createdAt: "desc" },
-          take: 1,
-        },
-        comments: {
-          include: {
-            author: { select: { id: true, name: true, email: true, image: true } },
-          },
-          orderBy: { createdAt: "asc" },
         },
       },
       orderBy: { scheduledAt: "asc" },
@@ -130,7 +116,7 @@ export async function POST(req: NextRequest) {
     return apiError("Invalid request body");
   }
 
-  const rawBody = (body && typeof body === "object" ? { ...body } : {}) as Record<string, any>;
+  const rawBody = (body && typeof body === "object" ? { ...body } : {}) as Record<string, unknown>;
   if (!rawBody.socialAccountIds && rawBody.accountIds) {
     rawBody.socialAccountIds = rawBody.accountIds;
   }

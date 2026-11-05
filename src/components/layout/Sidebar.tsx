@@ -30,8 +30,6 @@ import {
 import { cn } from "@/lib/utils/helpers";
 import { PostingerLogo } from "@/components/brand/PostingerLogo";
 import { ConnectChannelModal } from "@/components/channels/ConnectChannelModal";
-import { WhatsNewDrawer } from "@/components/layout/WhatsNewDrawer";
-import { CommandPalette } from "@/components/layout/CommandPalette";
 
 interface SocialAccountItem {
   id: string;
@@ -51,11 +49,9 @@ export function Sidebar() {
   const [showNewDropdown, setShowNewDropdown] = useState(false);
   const [showOrgDropdown, setShowOrgDropdown] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
-  const [showWhatsNew, setShowWhatsNew] = useState(false);
-  const [showCommandPalette, setShowCommandPalette] = useState(false);
   const [dismissProgressCard, setDismissProgressCard] = useState(false);
 
-  const [workspace, setWorkspace] = useState<any>(null);
+  const [workspace, setWorkspace] = useState<{ id: string; name: string; slug: string; plan?: string } | null>(null);
   const [accounts, setAccounts] = useState<SocialAccountItem[]>([]);
   const [scheduledCount, setScheduledCount] = useState(0);
 
@@ -72,18 +68,6 @@ export function Sidebar() {
     setIsCollapsed(next);
     localStorage.setItem("postinger_sidebar_collapsed", String(next));
   };
-
-  // Keyboard shortcut for Cmd+K command palette
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setShowCommandPalette((prev) => !prev);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
 
   // Fetch workspace and connected channels
   useEffect(() => {
@@ -142,13 +126,13 @@ export function Sidebar() {
               <Link href="/dashboard" className="flex items-center gap-2">
                 <PostingerLogo size="sm" light />
               </Link>
-              <button
-                onClick={() => setShowWhatsNew(true)}
-                title="What's New in Postinger"
+              <Link
+                href="/guide"
+                title="Product Guide & Docs"
                 className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 flex items-center justify-center transition-colors"
               >
                 <Sprout className="w-4 h-4" />
-              </button>
+              </Link>
             </>
           ) : (
             <div className="w-full flex justify-center">
@@ -193,13 +177,6 @@ export function Sidebar() {
                 >
                   <Lightbulb className="w-4 h-4 text-amber-400" />
                   <span>New Idea</span>
-                </Link>
-                <Link
-                  href="/start-page"
-                  className="flex items-center gap-2.5 p-2.5 rounded-xl hover:bg-white/5 transition-colors text-white"
-                >
-                  <Smartphone className="w-4 h-4 text-blue-400" />
-                  <span>New Start Page Block</span>
                 </Link>
               </div>
             )}
@@ -445,16 +422,6 @@ export function Sidebar() {
         workspaceId={workspace?.id || ""}
       />
 
-      <WhatsNewDrawer
-        isOpen={showWhatsNew}
-        onClose={() => setShowWhatsNew(false)}
-      />
-
-      <CommandPalette
-        isOpen={showCommandPalette}
-        onClose={() => setShowCommandPalette(false)}
-        onOpenConnectModal={() => setShowConnectModal(true)}
-      />
     </>
   );
 }

@@ -67,8 +67,8 @@ export async function GET(req: NextRequest) {
   const comments = await prisma.socialComment.findMany({
     where: {
       workspaceId,
-      ...(status ? { status: status as never } : {}),
-      ...(sentiment ? { sentiment: sentiment as never } : {}),
+      ...(status ? { status: status as import("@prisma/client").CommentStatus } : {}),
+      ...(sentiment ? { sentiment: sentiment as import("@prisma/client").CommentSentiment } : {}),
     },
     orderBy: { createdAt: "desc" },
   });

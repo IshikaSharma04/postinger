@@ -2,7 +2,7 @@
 
 /* ── Design Tokens ─────────────────────────────────────────────────────────── */
 :root {
-  /* ── Buffer Exact Warm Stone Canvas Palette ── */
+  /* ── Warm Stone Canvas Palette ── */
   --color-bg: #f4f0eb;
   --color-surface: #ffffff;
   --color-surface-subtle: #eae5de;
@@ -14,13 +14,13 @@
   --color-text-secondary: #525252;
   --color-text-tertiary: #828282;
 
-  /* ── Buffer Signature Brand Colors ── */
-  --color-buffer-lime: #c4f279;
-  --color-buffer-lime-hover: #b3ee63;
-  --color-buffer-dark: #121212;
-  --color-buffer-coral: #ffbea8;
-  --color-buffer-green: #25523b;
-  --color-buffer-blue: #2c4bff;
+  /* ── Accent Colors ── */
+  --color-brand-lime: #c4f279;
+  --color-brand-lime-hover: #b3ee63;
+  --color-brand-dark: #121212;
+  --color-brand-coral: #ffbea8;
+  --color-brand-green: #25523b;
+  --color-brand-blue: #2c4bff;
 
   --color-brand-50: #eff6ff;
   --color-brand-100: #dbeafe;
@@ -321,7 +321,7 @@ input[type="search"], input[type="url"], textarea, select { appearance: none; }
   z-index: 1;
 }
 
-/* ── Buffer Style Micro-Animations & Floating Social Badges ─────────────── */
+/* ── Interactive Micro-Animations & Floating Social Badges ─────────────── */
 @keyframes float-1 {
   0%, 100% {
     transform: translateY(0px) rotate(0deg);
@@ -414,39 +414,39 @@ input[type="search"], input[type="url"], textarea, select { appearance: none; }
   animation: pulse-subtle 3s ease-in-out infinite;
 }
 
-/* Buffer style card hover lift */
-.buffer-card-lift {
+/* Card hover lift */
+.postinger-card-lift {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.buffer-card-lift:hover {
+.postinger-card-lift:hover {
   transform: translateY(-3px);
   box-shadow: 0 16px 32px -8px rgba(0, 0, 0, 0.08);
 }
 
-/* ── Buffer Button Styles ── */
-.btn-buffer-lime {
+/* ── Brand Button Styles ── */
+.btn-brand-lime {
   background-color: #c4f279;
   color: #121212;
   font-weight: 600;
   border-radius: 9999px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.btn-buffer-lime:hover {
+.btn-brand-lime:hover {
   background-color: #b3ee63;
   transform: translateY(-1px);
 }
-.btn-buffer-dark {
+.btn-brand-dark {
   background-color: #121212;
   color: #ffffff;
   font-weight: 600;
   border-radius: 9999px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.btn-buffer-dark:hover {
+.btn-brand-dark:hover {
   background-color: #262626;
   transform: translateY(-1px);
 }
-.btn-buffer-outline {
+.btn-brand-outline {
   background-color: transparent;
   color: #121212;
   border: 1px solid #121212;
@@ -454,7 +454,7 @@ input[type="search"], input[type="url"], textarea, select { appearance: none; }
   border-radius: 9999px;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.btn-buffer-outline:hover {
+.btn-brand-outline:hover {
   background-color: rgba(18, 18, 18, 0.05);
 }
 

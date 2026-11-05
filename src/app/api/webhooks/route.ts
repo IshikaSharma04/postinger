@@ -57,8 +57,9 @@ export async function POST(req: NextRequest) {
   // SSRF check on target webhook URL
   try {
     await assertSafeUrl(url);
-  } catch (err: any) {
-    return apiError(err.message, 400);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Unsafe URL";
+    return apiError(msg, 400);
   }
 
   const member = await prisma.workspaceMember.findUnique({

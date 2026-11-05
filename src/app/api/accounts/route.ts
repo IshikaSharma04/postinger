@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
     return apiError("Invalid request body");
   }
 
-  const rawBody = (body && typeof body === "object" ? { ...body } : {}) as Record<string, any>;
+  const rawBody = (body && typeof body === "object" ? { ...body } : {}) as Record<string, unknown>;
   if (!rawBody.displayName && rawBody.accountName) {
     rawBody.displayName = rawBody.accountName;
   }

@@ -202,17 +202,17 @@ export function PostingerNavbar() {
           </nav>
         </div>
 
-        {/* Right Buttons: Buffer Log in & Mint Green CTA */}
+        {/* Right Buttons: Log in & Mint Green CTA */}
         <div className="hidden sm:flex items-center gap-3">
           <Link
             href="/login"
-            className="btn-buffer-outline px-6 py-2.5 text-sm font-semibold tracking-tight"
+            className="btn-brand-outline px-6 py-2.5 text-sm font-semibold tracking-tight"
           >
             Log in
           </Link>
           <Link
             href="/register"
-            className="btn-buffer-lime px-6 py-2.5 text-sm font-bold tracking-tight shadow-sm hover:shadow"
+            className="btn-brand-lime px-6 py-2.5 text-sm font-bold tracking-tight shadow-sm hover:shadow"
           >
             Get started for free
           </Link>
@@ -249,10 +249,10 @@ export function PostingerNavbar() {
             Pricing
           </Link>
           <div className="pt-3 border-t border-zinc-200 flex flex-col gap-2">
-            <Link href="/login" className="btn-buffer-outline w-full py-2.5 text-center text-sm font-bold">
+            <Link href="/login" className="btn-brand-outline w-full py-2.5 text-center text-sm font-bold">
               Log in
             </Link>
-            <Link href="/register" className="btn-buffer-lime w-full py-2.5 text-center text-sm font-bold">
+            <Link href="/register" className="btn-brand-lime w-full py-2.5 text-center text-sm font-bold">
               Get started for free
             </Link>
           </div>

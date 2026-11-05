@@ -6,34 +6,19 @@ import {
   Key,
   Plus,
   Trash2,
-  Copy,
-  Check,
-  AlertTriangle,
   Code,
-  ShieldCheck,
   ExternalLink,
-  Radio,
-  Send,
-  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { GenerateKeyModal } from "@/components/settings/api-keys/GenerateKeyModal";
+import { WebhooksSection } from "@/components/settings/api-keys/WebhooksSection";
+import { ApiKeyItem, WebhookItem, WorkspaceItem } from "@/components/settings/api-keys/types";
 
 export default function ApiKeysSettingsPage() {
-  const [workspace, setWorkspace] = useState<any>(null);
-  const [keys, setKeys] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  // New Key Modal
+  const [workspace, setWorkspace] = useState<WorkspaceItem | null>(null);
+  const [keys, setKeys] = useState<ApiKeyItem[]>([]);
+  const [webhooks, setWebhooks] = useState<WebhookItem[]>([]);
   const [showNewKeyModal, setShowNewKeyModal] = useState(false);
-  const [keyName, setKeyName] = useState("");
-  const [selectedScopes, setSelectedScopes] = useState<string[]>(["posts:read", "posts:write"]);
-  const [generatedSecret, setGeneratedSecret] = useState<string | null>(null);
-  const [generating, setGenerating] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  // Webhooks
-  const [webhooks, setWebhooks] = useState<any[]>([]);
-  const [webhookUrl, setWebhookUrl] = useState("");
   const [addingWebhook, setAddingWebhook] = useState(false);
 
   const fetchData = async () => {
@@ -41,7 +26,7 @@ export default function ApiKeysSettingsPage() {
       const wsRes = await fetch("/api/workspaces");
       const wsJson = await wsRes.json();
       if (wsJson.success && wsJson.data?.[0]) {
-        const ws = wsJson.data[0];
+        const ws: WorkspaceItem = wsJson.data[0];
         setWorkspace(ws);
 
         // Fetch API keys
@@ -58,8 +43,8 @@ export default function ApiKeysSettingsPage() {
           setWebhooks(whJson.data);
         }
       }
-    } finally {
-      setLoading(false);
+    } catch (err: unknown) {
+      console.warn("Error loading developer settings", err);
     }
   };
 
@@ -67,32 +52,28 @@ export default function ApiKeysSettingsPage() {
     fetchData();
   }, []);
 
-  const handleCreateKey = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!keyName.trim() || !workspace) return;
-    setGenerating(true);
-
+  const handleCreateKey = async (name: string, scopes: string[]): Promise<string | null> => {
+    if (!workspace) return null;
     try {
       const res = await fetch("/api/v1/keys", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workspaceId: workspace.id,
-          name: keyName.trim(),
-          scopes: selectedScopes,
+          name,
+          scopes,
         }),
       });
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate key");
 
-      setGeneratedSecret(data.data.key);
       toast.success("API key generated! Make sure to copy it now.");
       await fetchData();
-    } catch (e: any) {
-      toast.error(e.message || "Could not generate key");
-    } finally {
-      setGenerating(false);
+      return data.data.key;
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "Could not generate key");
+      return null;
     }
   };
 
@@ -107,9 +88,8 @@ export default function ApiKeysSettingsPage() {
     }
   };
 
-  const handleAddWebhook = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!webhookUrl.trim() || !workspace) return;
+  const handleAddWebhook = async (url: string) => {
+    if (!workspace) return;
     setAddingWebhook(true);
 
     try {
@@ -118,7 +98,7 @@ export default function ApiKeysSettingsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           workspaceId: workspace.id,
-          url: webhookUrl.trim(),
+          url,
           events: ["post.published", "post.failed", "comment.received"],
         }),
       });
@@ -127,20 +107,12 @@ export default function ApiKeysSettingsPage() {
       if (!res.ok) throw new Error(data.error || "Failed to register webhook");
 
       toast.success("Webhook endpoint registered successfully!");
-      setWebhookUrl("");
       await fetchData();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to create webhook");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to create webhook");
     } finally {
       setAddingWebhook(false);
     }
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    toast.success("Copied to clipboard!");
-    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -184,11 +156,7 @@ export default function ApiKeysSettingsPage() {
             <ExternalLink className="w-3.5 h-3.5 text-zinc-400" />
           </Link>
           <button
-            onClick={() => {
-              setGeneratedSecret(null);
-              setKeyName("");
-              setShowNewKeyModal(true);
-            }}
+            onClick={() => setShowNewKeyModal(true)}
             className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition-all shadow-xs"
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
@@ -251,152 +219,18 @@ export default function ApiKeysSettingsPage() {
       </div>
 
       {/* ── Outgoing Webhooks Section ── */}
-      <div className="bg-white p-6 rounded-3xl border border-zinc-200 shadow-xs space-y-4">
-        <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-          <div className="flex items-center gap-2">
-            <Radio className="w-4 h-4 text-emerald-600" />
-            <h3 className="font-bold text-sm text-zinc-900">Signed Webhooks (HMAC-SHA256)</h3>
-          </div>
-          <span className="text-xs text-zinc-400 font-mono">X-Postinger-Signature</span>
-        </div>
-
-        <form onSubmit={handleAddWebhook} className="flex gap-2">
-          <input
-            type="url"
-            value={webhookUrl}
-            onChange={(e) => setWebhookUrl(e.target.value)}
-            placeholder="https://api.yourdomain.com/webhooks/postinger"
-            className="flex-1 text-xs bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-600 font-mono"
-          />
-          <button
-            type="submit"
-            disabled={addingWebhook || !webhookUrl.trim()}
-            className="px-4 py-2 rounded-xl bg-zinc-900 hover:bg-black text-white text-xs font-bold transition-colors disabled:opacity-50"
-          >
-            {addingWebhook ? "Registering..." : "+ Add Webhook"}
-          </button>
-        </form>
-
-        <div className="divide-y divide-zinc-100 pt-2">
-          {webhooks.length === 0 ? (
-            <p className="text-xs text-zinc-400 py-4 text-center">No webhook endpoints registered.</p>
-          ) : (
-            webhooks.map((wh) => (
-              <div key={wh.id} className="py-3 first:pt-0 last:pb-0 flex items-center justify-between text-xs">
-                <div className="min-w-0 pr-4">
-                  <span className="font-mono text-zinc-800 font-semibold truncate block">{wh.url}</span>
-                  <span className="text-[10px] text-zinc-400 font-mono">
-                    Secret: {wh.secret ? `${wh.secret.slice(0, 10)}...` : "••••••••"}
-                  </span>
-                </div>
-                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[10px] font-bold border border-emerald-200">
-                  Active
-                </span>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+      <WebhooksSection
+        webhooks={webhooks}
+        onAddWebhook={handleAddWebhook}
+        addingWebhook={addingWebhook}
+      />
 
       {/* ── Generate Modal ── */}
-      {showNewKeyModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-zinc-200 space-y-4">
-            <h3 className="font-bold text-sm text-zinc-900 border-b border-zinc-100 pb-3">
-              Generate New API Key
-            </h3>
-
-            {!generatedSecret ? (
-              <form onSubmit={handleCreateKey} className="space-y-4">
-                <div>
-                  <label className="text-xs font-semibold text-zinc-700 block mb-1">Key Name / Description</label>
-                  <input
-                    type="text"
-                    value={keyName}
-                    onChange={(e) => setKeyName(e.target.value)}
-                    placeholder="e.g. Production CI/CD or MCP Server"
-                    className="w-full text-xs bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2 text-zinc-900 focus:outline-none focus:ring-2 focus:ring-blue-600"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-zinc-700 block mb-2">Permissions & Scopes</label>
-                  <div className="space-y-2 text-xs">
-                    {[
-                      { id: "posts:read", label: "posts:read (View published and scheduled posts)" },
-                      { id: "posts:write", label: "posts:write (Create drafts and queue posts)" },
-                      { id: "analytics:read", label: "analytics:read (Access engagement telemetry)" },
-                    ].map((scope) => {
-                      const checked = selectedScopes.includes(scope.id);
-                      return (
-                        <label key={scope.id} className="flex items-center gap-2 cursor-pointer text-zinc-700">
-                          <input
-                            type="checkbox"
-                            checked={checked}
-                            onChange={() => {
-                              setSelectedScopes((prev) =>
-                                checked ? prev.filter((s) => s !== scope.id) : [...prev, scope.id]
-                              );
-                            }}
-                            className="rounded accent-blue-600"
-                          />
-                          <span>{scope.label}</span>
-                        </label>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowNewKeyModal(false)}
-                    className="px-4 py-2 rounded-xl text-xs font-semibold text-zinc-600 hover:bg-zinc-100"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={generating || !keyName.trim()}
-                    className="px-5 py-2 rounded-xl font-bold text-xs text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                  >
-                    {generating ? "Generating..." : "Generate Key"}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <div className="space-y-4">
-                <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1">
-                  <div className="font-bold flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4 text-amber-600" />
-                    Save this key now!
-                  </div>
-                  <p className="text-[11px] text-amber-800">
-                    For your security, this secret token is hashed and cannot be shown again.
-                  </p>
-                </div>
-
-                <div className="p-3 bg-zinc-900 rounded-xl text-white font-mono text-xs flex items-center justify-between gap-2 overflow-x-auto">
-                  <span className="truncate">{generatedSecret}</span>
-                  <button
-                    onClick={() => copyToClipboard(generatedSecret)}
-                    className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white flex-shrink-0"
-                  >
-                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-                  </button>
-                </div>
-
-                <button
-                  onClick={() => setShowNewKeyModal(false)}
-                  className="w-full py-2.5 rounded-xl font-bold text-xs text-white bg-blue-600 hover:bg-blue-700 transition-colors"
-                >
-                  Done
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <GenerateKeyModal
+        isOpen={showNewKeyModal}
+        onClose={() => setShowNewKeyModal(false)}
+        onSubmit={handleCreateKey}
+      />
     </div>
   );
 }

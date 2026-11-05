@@ -37,7 +37,7 @@ export default function PostingerPublishPage() {
             <div className="pt-2">
               <Link
                 href="/register"
-                className="btn-buffer-dark inline-flex items-center gap-3 px-8 py-4 text-base font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
+                className="btn-brand-dark inline-flex items-center gap-3 px-8 py-4 text-base font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
               >
                 <span>Get started for free</span>
                 <ArrowRight className="w-4 h-4" />
@@ -171,7 +171,7 @@ export default function PostingerPublishPage() {
                       window.location.href = `/register?prefill=${encodeURIComponent(el.value)}`;
                     }
                   }}
-                  className="btn-buffer-lime text-xs px-5 py-2.5 font-bold flex-1 sm:flex-none text-center shadow-xs"
+                  className="btn-brand-lime text-xs px-5 py-2.5 font-bold flex-1 sm:flex-none text-center shadow-xs"
                 >
                   Save Draft Locally &amp; Sign Up →
                 </button>

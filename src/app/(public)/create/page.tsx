@@ -75,7 +75,7 @@ export default function PostingerCreatePage() {
             <div className="pt-2">
               <Link
                 href="/register"
-                className="btn-buffer-dark inline-flex items-center gap-3 px-8 py-4 text-base font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
+                className="btn-brand-dark inline-flex items-center gap-3 px-8 py-4 text-base font-bold shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-95 transition-all"
               >
                 <span>Get started for free</span>
                 <ArrowRight className="w-4 h-4" />
@@ -368,7 +368,7 @@ export default function PostingerCreatePage() {
           <div>
             <Link
               href="/register"
-              className="btn-buffer-lime inline-block px-9 py-4 text-base font-extrabold shadow-xl hover:scale-105 active:scale-95 transition-all text-zinc-950"
+              className="btn-brand-lime inline-block px-9 py-4 text-base font-extrabold shadow-xl hover:scale-105 active:scale-95 transition-all text-zinc-950"
             >
               Get started for free
             </Link>

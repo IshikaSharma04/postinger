@@ -94,7 +94,7 @@ export function PostingerHeroMockup() {
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
     >
-      {/* ── Buffer-Style Tab Navigation Buttons ── */}
+      {/* ── Postinger-Style Tab Navigation Buttons ── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
         {TABS.map((tab, idx) => {
           const Icon = tab.icon;

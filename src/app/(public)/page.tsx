@@ -37,7 +37,7 @@ import { PostingerShowcaseCards } from "@/components/home/PostingerShowcaseCards
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-[#FAFAF8] text-[#121212] selection:bg-[#98E376] selection:text-black font-sans antialiased">
-      {/* ── Buffer Commit Contest Announcement Banner (matching Screenshot 1) ── */}
+      {/* ── Commit Contest Announcement Banner (matching Screenshot 1) ── */}
       <div className="bg-[#121212] text-white text-xs py-2.5 px-4 text-center font-medium flex items-center justify-center gap-3">
         <span className="hidden sm:inline-block w-8 h-[1px] bg-zinc-800" />
         <span className="inline-flex items-center gap-2">
@@ -59,7 +59,7 @@ export default function HomePage() {
       {/* ── Official Postinger Navigation ─────────────────────────────────── */}
       <PostingerPublicNavbar />
 
-      {/* ── Buffer Hero Workspace (matching Screenshot 1) ─────────────── */}
+      {/* ── Hero Workspace (matching Screenshot 1) ─────────────── */}
       <PostingerHeroWorkspace />
 
       {/* ── Social Proof Marquee (matching Screenshot 2) ──────────────── */}
@@ -416,13 +416,13 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/register"
-              className="btn-buffer-dark px-9 py-4 text-base font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+              className="btn-brand-dark px-9 py-4 text-base font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all"
             >
               Get started for free &rarr;
             </Link>
             <Link
               href="/login"
-              className="btn-buffer-outline px-8 py-4 text-base font-bold bg-transparent border-black text-black hover:bg-black/10 transition-all"
+              className="btn-brand-outline px-8 py-4 text-base font-bold bg-transparent border-black text-black hover:bg-black/10 transition-all"
             >
               Sign into Postinger
             </Link>

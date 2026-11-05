@@ -137,7 +137,7 @@ describe("Postinger Live End-to-End Buffer Workflows", async () => {
     assert.equal(res.status, 200);
     const body = await res.json();
     const posts = body.data?.posts || body.posts || [];
-    const found = posts.find((p: any) => p.id === draftPostId);
+    const found = posts.find((p: { id: string; status: string }) => p.id === draftPostId);
     assert.ok(found, "Scheduled post must be present in GET /api/posts?status=SCHEDULED");
     assert.equal(found.status, "SCHEDULED");
   });
@@ -180,7 +180,7 @@ describe("Postinger Live End-to-End Buffer Workflows", async () => {
     });
     const checkBody = await checkRes.json();
     const currentAccounts = checkBody.data || checkBody.accounts || [];
-    const stillThere = currentAccounts.some((a: any) => a.id === newAccount.id);
+    const stillThere = currentAccounts.some((a: { id: string }) => a.id === newAccount.id);
     assert.equal(stillThere, false, "Disconnected account must be removed from workspace accounts");
   });
 

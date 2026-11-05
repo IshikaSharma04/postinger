@@ -16,7 +16,6 @@ import {
   ShieldCheck,
   BookOpen,
 } from "lucide-react";
-import { GuidePrismCanvas } from "@/components/three/GuidePrismCanvas";
 
 export default function GuidePage() {
   const steps = [
@@ -134,7 +133,9 @@ export default function GuidePage() {
           </div>
 
           <div className="md:col-span-4 flex items-center justify-center">
-            <GuidePrismCanvas className="w-full h-52" />
+            <div className="w-32 h-32 rounded-3xl bg-white/5 border border-white/10 flex items-center justify-center text-lime-400">
+              <Zap className="w-16 h-16 animate-pulse" />
+            </div>
           </div>
         </div>
 

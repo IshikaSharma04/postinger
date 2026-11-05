@@ -26,7 +26,8 @@ export async function POST(req: NextRequest) {
       ...parsed.data,
     });
     return apiSuccess(result);
-  } catch (err: any) {
-    return apiError(err.message || "Failed to process AI request");
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Failed to process AI request";
+    return apiError(msg);
   }
 }

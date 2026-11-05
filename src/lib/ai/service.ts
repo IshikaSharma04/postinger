@@ -93,8 +93,9 @@ Task: Provide 3 high-impact, engaging content variations. Return each on a new l
 
         return { configured: true, provider: "OpenAI", suggestions };
       }
-    } catch (err: any) {
-      console.warn("[AI Provider warning, using smart fallback]:", err?.message);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[AI Provider warning, using smart fallback]:", msg);
     }
   }
 
@@ -116,8 +117,9 @@ Task: Provide 3 high-impact, engaging content variations. Return each on a new l
         const suggestions = text.split("\n").map((s: string) => s.trim().replace(/^[-*•\d.]+\s*/, "")).filter((s: string) => s.length > 5);
         return { configured: true, provider: "Google Gemini", suggestions };
       }
-    } catch (err: any) {
-      console.warn("[Gemini API warning, using fallback]:", err?.message);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[Gemini API warning, using fallback]:", msg);
     }
   }
 
@@ -149,8 +151,9 @@ Task: Provide 3 high-impact, engaging content variations. Return each on a new l
           .filter((s: string) => s.length > 5);
         return { configured: true, provider: "OpenRouter (Free)", suggestions };
       }
-    } catch (err: any) {
-      console.warn("[OpenRouter API warning, using fallback]:", err?.message);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[OpenRouter API warning, using fallback]:", msg);
     }
   }
 
@@ -180,8 +183,9 @@ Task: Provide 3 high-impact, engaging content variations. Return each on a new l
           .filter((s: string) => s.length > 5);
         return { configured: true, provider: "Mistral", suggestions };
       }
-    } catch (err: any) {
-      console.warn("[Mistral API warning, using fallback]:", err?.message);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn("[Mistral API warning, using fallback]:", msg);
     }
   }
 

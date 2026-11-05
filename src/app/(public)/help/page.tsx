@@ -150,7 +150,7 @@ export default function HelpCenterPage() {
 
           {filteredFaqs.length === 0 ? (
             <div className="text-center py-12 rounded-2xl bg-slate-800/30 border border-slate-800">
-              <p className="text-slate-400">No articles matching "{search}". Try searching for another term.</p>
+              <p className="text-slate-400">No articles matching &ldquo;{search}&rdquo;. Try searching for another term.</p>
             </div>
           ) : (
             filteredFaqs.map((faq, index) => {

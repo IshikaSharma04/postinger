@@ -87,8 +87,8 @@ export function ConnectChannelModal({ isOpen, onClose, workspaceId }: ConnectMod
       queryClient.invalidateQueries({ queryKey: ["workspace"] });
       setSelectedChannel(null);
       onClose();
-    } catch (err: any) {
-      toast.error(err.message || "Could not connect account");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Could not connect account");
     } finally {
       setConnecting(false);
     }

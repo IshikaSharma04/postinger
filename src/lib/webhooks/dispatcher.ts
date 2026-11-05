@@ -12,10 +12,10 @@ export type WebhookEvent = "post.published" | "post.failed" | "comment.received"
 export interface WebhookPayload {
   event: WebhookEvent;
   timestamp: string;
-  data: Record<string, any>;
+  data: Record<string, unknown>;
 }
 
-export async function dispatchWebhook(workspaceId: string, event: WebhookEvent, data: Record<string, any>) {
+export async function dispatchWebhook(workspaceId: string, event: WebhookEvent, data: Record<string, unknown>) {
   const webhooks = await prisma.webhook.findMany({
     where: {
       workspaceId,
@@ -57,8 +57,9 @@ export async function dispatchWebhook(workspaceId: string, event: WebhookEvent, 
         body: payloadString,
         signal: controller.signal,
       }).finally(() => clearTimeout(timeout));
-    } catch (err: any) {
-      console.warn(`[Webhook Delivery Error] ${hook.url}:`, err?.message);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      console.warn(`[Webhook Delivery Error] ${hook.url}:`, msg);
     }
   }
 }

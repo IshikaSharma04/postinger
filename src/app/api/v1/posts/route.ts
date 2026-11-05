@@ -5,9 +5,11 @@ import { isRateLimited } from "@/lib/utils/rate-limit";
 import crypto from "crypto";
 import { z } from "zod";
 
+import type { ApiKey } from "@prisma/client";
+
 type AuthResult =
   | { error: string; status: number }
-  | { apiKey: any; workspaceId: string };
+  | { apiKey: ApiKey; workspaceId: string };
 
 async function authenticateApiKey(req: NextRequest, requiredScope: string): Promise<AuthResult> {
   const authHeader = req.headers.get("authorization");

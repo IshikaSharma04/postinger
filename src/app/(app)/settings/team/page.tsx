@@ -80,8 +80,8 @@ export default function TeamSettingsPage() {
       if (teamData?.data) {
         setMembers(teamData.data);
       }
-    } catch (err: any) {
-      toast.error(err.message || "Failed to send invitation");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to send invitation");
     } finally {
       setIsSubmitting(false);
     }
@@ -100,8 +100,8 @@ export default function TeamSettingsPage() {
       }
       toast.success("Member removed successfully");
       setMembers((prev) => prev.filter((m) => m.id !== memberId));
-    } catch (err: any) {
-      toast.error(err.message || "Failed to remove member");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Failed to remove member");
     }
   };
 

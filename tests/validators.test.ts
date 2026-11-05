@@ -6,6 +6,10 @@ import {
   createPostSchema,
   createWorkspaceSchema,
   connectAccountSchema,
+  createIdeaSchema,
+  createPostingSlotSchema,
+  approvePostSchema,
+  replyCommentSchema,
 } from "../src/lib/validators/schemas";
 
 describe("Validation Schemas", () => {
@@ -139,7 +143,6 @@ describe("Validation Schemas", () => {
 
   describe("createIdeaSchema & updateIdeaSchema", () => {
     it("validates valid scratchpad idea", () => {
-      const { createIdeaSchema } = require("../src/lib/validators/schemas");
       const valid = {
         workspaceId: "ws-123",
         title: "Video series on React server components",
@@ -152,7 +155,6 @@ describe("Validation Schemas", () => {
     });
 
     it("rejects idea with empty title", () => {
-      const { createIdeaSchema } = require("../src/lib/validators/schemas");
       const invalid = { workspaceId: "ws-123", title: "" };
       const res = createIdeaSchema.safeParse(invalid);
       assert.equal(res.success, false);
@@ -161,7 +163,6 @@ describe("Validation Schemas", () => {
 
   describe("createPostingSlotSchema", () => {
     it("validates recurring weekly queue schedule slot", () => {
-      const { createPostingSlotSchema } = require("../src/lib/validators/schemas");
       const valid = {
         workspaceId: "ws-123",
         dayOfWeek: 3, // Wednesday
@@ -173,7 +174,6 @@ describe("Validation Schemas", () => {
     });
 
     it("rejects invalid time format for queue slot", () => {
-      const { createPostingSlotSchema } = require("../src/lib/validators/schemas");
       const invalid = {
         workspaceId: "ws-123",
         dayOfWeek: 3,
@@ -186,14 +186,12 @@ describe("Validation Schemas", () => {
 
   describe("approvePostSchema & replyCommentSchema", () => {
     it("validates post approval decision", () => {
-      const { approvePostSchema } = require("../src/lib/validators/schemas");
       const valid = { decision: "APPROVE", notes: "Looks great, approved for publishing" };
       const res = approvePostSchema.safeParse(valid);
       assert.equal(res.success, true);
     });
 
     it("validates social inbox comment reply", () => {
-      const { replyCommentSchema } = require("../src/lib/validators/schemas");
       const valid = { replyText: "Thanks for reaching out! We support this out of the box." };
       const res = replyCommentSchema.safeParse(valid);
       assert.equal(res.success, true);

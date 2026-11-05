@@ -36,8 +36,8 @@ export default function SettingsProfilePage() {
 
       toast.success(data.data?.message || "Profile updated successfully!");
       if (update) update({ name, email });
-    } catch (err: any) {
-      toast.error(err.message || "Could not save profile changes");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "Could not save profile changes");
     } finally {
       setSaving(false);
     }

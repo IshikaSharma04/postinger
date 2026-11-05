@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const ideas = await prisma.idea.findMany({
     where: {
       workspaceId,
-      ...(status ? { status: status as never } : {}),
+      ...(status ? { status: status as import("@prisma/client").IdeaStatus } : {}),
     },
     include: {
       author: { select: { id: true, name: true, image: true, email: true } },

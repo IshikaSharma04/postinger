@@ -33,8 +33,16 @@ export const unsplashAdapter: MediaSourceAdapter = {
           { headers: { Authorization: `Client-ID ${accessKey}` } }
         );
         const data = await res.json();
+        interface UnsplashPhotoResult {
+          id: string;
+          urls: { regular: string; small: string };
+          alt_description?: string | null;
+          user?: { name: string };
+          width?: number;
+          height?: number;
+        }
         if (Array.isArray(data.results)) {
-          return data.results.map((r: any) => ({
+          return (data.results as UnsplashPhotoResult[]).map((r) => ({
             id: r.id,
             source: "unsplash",
             url: r.urls.regular,

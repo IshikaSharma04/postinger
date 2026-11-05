@@ -21,9 +21,9 @@ export async function GET(req: NextRequest) {
   });
   if (!member) return apiForbidden();
 
-  const where = {
+  const where: import("@prisma/client").Prisma.PublishingJobWhereInput = {
     post: { workspaceId },
-    ...(status ? { status: status as never } : {}),
+    ...(status ? { status: status as import("@prisma/client").JobStatus } : {}),
   };
 
   const [jobs, total] = await Promise.all([

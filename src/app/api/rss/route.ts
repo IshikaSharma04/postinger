@@ -66,8 +66,9 @@ export async function POST(req: NextRequest) {
     });
 
     return apiSuccess({ feed, newItemsCount }, 201);
-  } catch (err: any) {
-    return apiError(err.message || "Failed to subscribe to RSS feed");
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : "Failed to subscribe to RSS feed";
+    return apiError(msg);
   }
 }
 

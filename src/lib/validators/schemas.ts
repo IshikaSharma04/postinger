@@ -52,6 +52,37 @@ export const inviteMemberSchema = z.object({
   role: z.enum(["ADMIN", "MEMBER"]),
 });
 
+export const paginationSchema = z.object({
+  page: z.coerce.number().int().positive().default(1),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+});
+
+export const postStatusEnum = z.enum([
+  "DRAFT",
+  "NEEDS_APPROVAL",
+  "SCHEDULED",
+  "PROCESSING",
+  "PUBLISHED",
+  "FAILED",
+  "CANCELLED",
+  "PARTIALLY_FAILED",
+]);
+
+export const platformEnum = z.enum([
+  "TWITTER",
+  "INSTAGRAM",
+  "LINKEDIN",
+  "FACEBOOK",
+  "TIKTOK",
+  "YOUTUBE",
+  "PINTEREST",
+  "THREADS",
+  "BLUESKY",
+  "MASTODON",
+  "GOOGLE_BUSINESS",
+  "SUBSTACK_NOTES",
+]);
+
 // ── Post Schemas ──────────────────────────────────────────────────────────────
 
 export const postVariantSchema = z.object({

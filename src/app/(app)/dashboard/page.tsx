@@ -101,7 +101,7 @@ export default async function DashboardPage() {
         id: workspace?.id ?? workspaceId,
         name: workspace?.name ?? membership.workspace.name,
         plan: workspace?.plan ?? "FREE",
-        postingGoal: (workspace as any)?.postingGoal ?? 5,
+        postingGoal: workspace?.postingGoal ?? 5,
       }}
       accounts={accounts}
       upcomingPosts={upcomingFormatted}

@@ -11,7 +11,7 @@ export interface CapturedEmail {
   type: "VERIFICATION" | "PASSWORD_RESET" | "INVITATION" | "NOTIFICATION";
 }
 
-// In-memory ring buffer of recently dispatched emails for instant developer access
+// In-memory ring queue of recently dispatched emails for instant developer access
 const emailInbox: CapturedEmail[] = [];
 const MAX_EMAILS = 50;
 
